@@ -49,9 +49,24 @@ export async function GET(request: NextRequest) {
       })
     } catch (prismaError: any) {
       console.error("❌ Prisma error finding activation code:", prismaError)
-      console.error("Error details:", JSON.stringify(prismaError, null, 2))
+      console.error("Error code:", prismaError?.code)
+      console.error("Error message:", prismaError?.message)
+      console.error("Error meta:", JSON.stringify(prismaError?.meta, null, 2))
+      
+      // If table doesn't exist (P2021), return a helpful error
+      if (prismaError?.code === "P2021" || prismaError?.message?.includes("does not exist")) {
+        return NextResponse.json(
+          { 
+            error: "La tabla ActivationCode no existe en la base de datos. Por favor ejecuta 'npx prisma db push' para crear la tabla.",
+            details: prismaError?.message,
+            code: prismaError?.code
+          },
+          { status: 500 }
+        )
+      }
+      
       return NextResponse.json(
-        { error: "Error al buscar el código de activación", details: prismaError?.message },
+        { error: "Error al buscar el código de activación", details: prismaError?.message, code: prismaError?.code },
         { status: 500 }
       )
     }
