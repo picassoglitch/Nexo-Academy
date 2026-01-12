@@ -64,7 +64,7 @@ RESEND_WEBHOOK_SECRET=whsec_...  # Get from Resend Dashboard → Webhooks
 3. Go to **Settings** → **Environment Variables**
 4. Add each variable above
 5. Set them for **Production**, **Preview**, and **Development**
-6. After first deploy, update `NEXT_PUBLIC_SITE_URL` with your actual Vercel domain
+6. Your production domain is: `https://nexo-ai.world` (already set above)
 
 ## Important Notes
 
