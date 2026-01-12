@@ -51,12 +51,21 @@ enum ReferralStatus {
 }
 
 model User {
+<<<<<<< HEAD
   id               String    @id @default(uuid())
   email            String    @unique
   name             String?
   role             UserRole  @default(USER)
   tier             Int       @default(0) // 0=gratis, 1=starter, 2=pro, 3=operator
   selectedPathId   String? // Para starter: ID del módulo/path elegido (deprecated, usar selectedCourseId)
+=======
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String?
+  role          UserRole @default(USER)
+  tier          Int      @default(0) // 0=gratis, 1=starter, 2=pro, 3=operator
+  selectedPathId String? // Para starter: ID del mÃ³dulo/path elegido (deprecated, usar selectedCourseId)
+>>>>>>> origin/production-improvements
   selectedCourseId String? // Para starter: ID del curso elegido
   mpCustomerId     String? // Stripe customer ID (field name kept for backward compatibility)
   supabaseId       String? // Supabase Auth user ID
@@ -432,4 +441,19 @@ model ActivationCode {
   @@index([code])
   @@index([email])
   @@index([orderId])
+}
+
+// Stripe Webhook Events - for idempotency
+model StripeEvent {
+  id          String   @id // Stripe event ID (evt_...)
+  type        String   // Event type (checkout.session.completed, etc.)
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  payload     Json?    // Store event data for debugging
+  error       String?  // Store error message if processing failed
+  createdAt   DateTime @default(now())
+
+  @@index([type])
+  @@index([processed])
+  @@index([createdAt])
 }

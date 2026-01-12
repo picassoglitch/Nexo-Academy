@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { Resend } from "resend"
 import { getEmailSender } from "@/lib/email-config"
+import { checkRateLimit, rateLimitExceededResponse, RATE_LIMITS } from "@/lib/rate-limit"
 
 export const dynamic = "force-dynamic"
 
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
       // Return success anyway to prevent email enumeration
       return NextResponse.json({
         success: true,
-        message: "Si existe una cuenta con este email, recibirás un enlace para restablecer tu contraseña.",
+        message: "Si existe una cuenta con este email, recibirÃ¡s un enlace para restablecer tu contraseÃ±a.",
       })
     }
 
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       if (linkError || !linkData?.properties?.action_link) {
         console.error("Error generating password reset link:", linkError)
         return NextResponse.json(
-          { error: "Error al generar el enlace de recuperación. Por favor, intenta de nuevo." },
+          { error: "Error al generar el enlace de recuperaciÃ³n. Por favor, intenta de nuevo." },
           { status: 500 }
         )
       }
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
     } catch (linkGenError) {
       console.error("Exception generating password reset link:", linkGenError)
       return NextResponse.json(
-        { error: "Error al generar el enlace de recuperación. Por favor, intenta de nuevo." },
+        { error: "Error al generar el enlace de recuperaciÃ³n. Por favor, intenta de nuevo." },
         { status: 500 }
       )
     }
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
         await resend.emails.send({
           from: getEmailSender(),
           to: email,
-          subject: "Restablece tu contraseña - Nexo",
+          subject: "Restablece tu contraseÃ±a - Nexo",
           html: `
             <!DOCTYPE html>
             <html>
@@ -86,14 +87,14 @@ export async function POST(request: NextRequest) {
             </head>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="color: white; margin: 0;">Restablece tu Contraseña</h1>
+                <h1 style="color: white; margin: 0;">Restablece tu ContraseÃ±a</h1>
               </div>
               
               <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
                 <p style="font-size: 16px;">Hola,</p>
                 
                 <p style="font-size: 16px;">
-                  Has solicitado restablecer tu contraseña para tu cuenta de Nexo. Haz clic en el botón de abajo para crear una nueva contraseña.
+                  Has solicitado restablecer tu contraseÃ±a para tu cuenta de Nexo. Haz clic en el botÃ³n de abajo para crear una nueva contraseÃ±a.
                 </p>
                 
                 <div style="text-align: center; margin: 30px 0;">
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
                             border-radius: 5px; 
                             display: inline-block; 
                             font-weight: bold;">
-                    Restablecer Contraseña
+                    Restablecer ContraseÃ±a
                   </a>
                 </div>
                 
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
                 
                 <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
                   <p style="margin: 0; font-size: 14px; color: #856404;">
-                    <strong>⚠️ Importante:</strong> Este enlace expirará en 1 hora. Si no solicitaste este cambio, puedes ignorar este email de forma segura.
+                    <strong>âš ï¸ Importante:</strong> Este enlace expirarÃ¡ en 1 hora. Si no solicitaste este cambio, puedes ignorar este email de forma segura.
                   </p>
                 </div>
                 
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: "Se ha enviado un enlace para restablecer tu contraseña. Por favor, revisa tu bandeja de entrada.",
+          message: "Se ha enviado un enlace para restablecer tu contraseÃ±a. Por favor, revisa tu bandeja de entrada.",
         })
       } catch (emailError) {
         console.error("Error sending email via Resend:", emailError)
@@ -148,10 +149,10 @@ export async function POST(request: NextRequest) {
 
     // Resend is required - return error if not configured
     if (!resend) {
-      console.error("❌ RESEND_API_KEY not configured, cannot send email")
+      console.error("âŒ RESEND_API_KEY not configured, cannot send email")
       return NextResponse.json(
         { 
-          error: "El servicio de email no está configurado. Por favor, contacta al soporte técnico.",
+          error: "El servicio de email no estÃ¡ configurado. Por favor, contacta al soporte tÃ©cnico.",
           link: resetLink // Provide link as fallback for manual use
         },
         { status: 500 }
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
     // If we get here, Resend failed but is configured
     return NextResponse.json(
       { 
-        error: "Error al enviar el email. Por favor, intenta de nuevo más tarde o contacta al soporte.",
+        error: "Error al enviar el email. Por favor, intenta de nuevo mÃ¡s tarde o contacta al soporte.",
         link: resetLink // Provide link as fallback
       },
       { status: 500 }
@@ -174,3 +175,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+

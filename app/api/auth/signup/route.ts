@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { Resend } from "resend"
 import { getEmailSender } from "@/lib/email-config"
+import { checkRateLimit, rateLimitExceededResponse, RATE_LIMITS } from "@/lib/rate-limit"
 
 export const dynamic = "force-dynamic"
 
@@ -18,14 +19,14 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email y contraseña son requeridos" },
+        { error: "Email y contraseÃ±a son requeridos" },
         { status: 400 }
       )
     }
 
     if (password.length < 6) {
       return NextResponse.json(
-        { error: "La contraseña debe tener al menos 6 caracteres" },
+        { error: "La contraseÃ±a debe tener al menos 6 caracteres" },
         { status: 400 }
       )
     }
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Ya existe una cuenta con este email. Por favor, inicia sesión." },
+        { error: "Ya existe una cuenta con este email. Por favor, inicia sesiÃ³n." },
         { status: 400 }
       )
     }
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (linkError || !linkData?.properties?.action_link) {
       console.error("Error generating confirmation link:", linkError)
       return NextResponse.json(
-        { error: "Error al generar el enlace de confirmación", details: linkError?.message },
+        { error: "Error al generar el enlace de confirmaciÃ³n", details: linkError?.message },
         { status: 500 }
       )
     }
@@ -81,19 +82,19 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email via Resend
     if (!resend) {
-      console.error("❌ RESEND_API_KEY not configured")
-      console.error("❌ RESEND_API_KEY value:", process.env.RESEND_API_KEY ? "EXISTS (but Resend client is null)" : "MISSING")
+      console.error("âŒ RESEND_API_KEY not configured")
+      console.error("âŒ RESEND_API_KEY value:", process.env.RESEND_API_KEY ? "EXISTS (but Resend client is null)" : "MISSING")
       return NextResponse.json(
         { 
-          error: "El servicio de email no está configurado. Por favor, contacta al soporte técnico.",
+          error: "El servicio de email no estÃ¡ configurado. Por favor, contacta al soporte tÃ©cnico.",
           link: confirmationLink // Provide link as fallback
         },
         { status: 500 }
       )
     }
 
-    console.log("📧 Attempting to send email via Resend to:", email)
-    console.log("📧 From address:", getEmailSender())
+    console.log("ðŸ“§ Attempting to send email via Resend to:", email)
+    console.log("ðŸ“§ From address:", getEmailSender())
     
     try {
       const emailResult = await resend.emails.send({
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
               
               <p style="font-size: 16px;">
                 Gracias por crear tu cuenta en Nexo. Para activar tu cuenta y acceder a todos los beneficios, 
-                necesitas confirmar tu dirección de email.
+                necesitas confirmar tu direcciÃ³n de email.
               </p>
               
               <div style="text-align: center; margin: 30px 0;">
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
               </p>
               
               <p style="font-size: 14px; color: #666; margin-top: 20px;">
-                ¡Nos vemos dentro!<br>
+                Â¡Nos vemos dentro!<br>
                 El equipo de Nexo
               </p>
             </div>
@@ -156,32 +157,32 @@ export async function POST(request: NextRequest) {
 
       // Check if email was actually sent
       if (emailResult.error) {
-        console.error("❌ Resend returned an error:", emailResult.error)
+        console.error("âŒ Resend returned an error:", emailResult.error)
         
         // Check if it's the domain verification error
         if (emailResult.error.message?.includes("only send testing emails to your own email")) {
-          console.warn("⚠️ Resend free tier limitation: Can only send to account owner's email")
-          console.warn("⚠️ Solution: Verify a domain in Resend or use Supabase email")
+          console.warn("âš ï¸ Resend free tier limitation: Can only send to account owner's email")
+          console.warn("âš ï¸ Solution: Verify a domain in Resend or use Supabase email")
           
           // Fallback: Use Supabase's built-in email sending
           try {
-            console.log("📧 Falling back to Supabase email sending...")
+            console.log("ðŸ“§ Falling back to Supabase email sending...")
             // Supabase will automatically send confirmation email when we create the user
             // But we already created it with email_confirm: false, so we need to trigger it
             // Actually, we can't easily trigger Supabase's email after creation
             // So we'll return the confirmation link directly to the user
             return NextResponse.json({
               success: true,
-              message: "Cuenta creada exitosamente. Por favor, usa el enlace de confirmación a continuación.",
+              message: "Cuenta creada exitosamente. Por favor, usa el enlace de confirmaciÃ³n a continuaciÃ³n.",
               userId: newUser.user.id,
               confirmationLink: confirmationLink, // Provide link directly
-              warning: "Email no enviado automáticamente. Usa el enlace de confirmación proporcionado.",
+              warning: "Email no enviado automÃ¡ticamente. Usa el enlace de confirmaciÃ³n proporcionado.",
             })
           } catch (fallbackError) {
-            console.error("❌ Fallback also failed:", fallbackError)
+            console.error("âŒ Fallback also failed:", fallbackError)
             return NextResponse.json({
               success: true,
-              message: "Cuenta creada exitosamente. Por favor, contacta al soporte para obtener el enlace de confirmación.",
+              message: "Cuenta creada exitosamente. Por favor, contacta al soporte para obtener el enlace de confirmaciÃ³n.",
               userId: newUser.user.id,
               confirmationLink: confirmationLink,
             })
@@ -192,17 +193,17 @@ export async function POST(request: NextRequest) {
         throw new Error(emailResult.error.message || "Resend API error")
       }
 
-      console.log("✅ Signup confirmation email sent via Resend to:", email)
-      console.log("✅ Email ID:", emailResult.data?.id)
+      console.log("âœ… Signup confirmation email sent via Resend to:", email)
+      console.log("âœ… Email ID:", emailResult.data?.id)
 
       return NextResponse.json({
         success: true,
-        message: "Cuenta creada exitosamente. Se ha enviado un email de confirmación.",
+        message: "Cuenta creada exitosamente. Se ha enviado un email de confirmaciÃ³n.",
         userId: newUser.user.id,
       })
     } catch (emailError: any) {
-      console.error("❌ Error sending email via Resend:", emailError)
-      console.error("❌ Error details:", {
+      console.error("âŒ Error sending email via Resend:", emailError)
+      console.error("âŒ Error details:", {
         message: emailError?.message,
         name: emailError?.name,
         stack: emailError?.stack,
@@ -211,10 +212,10 @@ export async function POST(request: NextRequest) {
       // Return confirmation link even if email fails
       return NextResponse.json({
         success: true,
-        message: "Cuenta creada exitosamente. Por favor, usa el enlace de confirmación a continuación.",
+        message: "Cuenta creada exitosamente. Por favor, usa el enlace de confirmaciÃ³n a continuaciÃ³n.",
         userId: newUser.user.id,
         confirmationLink: confirmationLink,
-        warning: "Email no enviado automáticamente. Usa el enlace de confirmación proporcionado.",
+        warning: "Email no enviado automÃ¡ticamente. Usa el enlace de confirmaciÃ³n proporcionado.",
       })
     }
   } catch (error: any) {
@@ -225,3 +226,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
