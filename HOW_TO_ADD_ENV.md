@@ -7,7 +7,7 @@
 1. **Open your `.env` file** in the root directory of your project
 2. **Add this line** (or update if it already exists):
    ```env
-   RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
+   RESEND_API_KEY=your_resend_api_key
    ```
 3. **Save the file**
 4. **Restart your development server** (stop and run `npm run dev` again)
@@ -21,7 +21,7 @@
 2. **Add these lines** to the `.env` file:
    ```env
    # Resend Email Service
-   RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
+   RESEND_API_KEY=your_resend_api_key
    
    # Supabase (you should already have these)
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url

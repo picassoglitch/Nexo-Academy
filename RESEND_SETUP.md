@@ -4,7 +4,7 @@
 
 Your Resend API key has been set up:
 ```
-RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
+RESEND_API_KEY=your_resend_api_key
 ```
 
 ## 📧 Email Flows Using Resend
@@ -22,7 +22,7 @@ All email notifications now use Resend:
 Add this to your `.env` file:
 
 ```env
-RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
+RESEND_API_KEY=your_resend_api_key
 ```
 
 ## 📝 Email Sender Configuration
