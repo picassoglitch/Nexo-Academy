@@ -40,25 +40,38 @@ activationCodes ActivationCode[]
 
 ### Step 1: Sync Prisma Schema
 
-**IMPORTANT**: Before syncing, you need to temporarily remove the foreign key constraint from `public.profiles`:
+**Note**: If you have a `public.profiles` table with a foreign key to `auth.users`, you'll need to temporarily remove that constraint before syncing. If you don't have `public.profiles`, skip to step 3.
 
-1. Go to Supabase Dashboard → SQL Editor
-2. Run:
+1. Check if `public.profiles` exists in Supabase SQL Editor:
+   ```sql
+   SELECT EXISTS (
+     SELECT FROM information_schema.tables 
+     WHERE table_schema = 'public' 
+     AND table_name = 'profiles'
+   );
+   ```
+
+2. **Only if the table exists**, temporarily remove the foreign key constraint:
    ```sql
    ALTER TABLE public.profiles 
    DROP CONSTRAINT IF EXISTS profiles_id_fkey;
    ```
 
-3. Then run:
+3. Sync Prisma schema:
    ```bash
    npx prisma db push
    ```
 
-4. After `db push` completes, re-add the constraint:
+4. **Only if you removed the constraint in step 2**, re-add it after `db push` completes:
    ```sql
    ALTER TABLE public.profiles 
    ADD CONSTRAINT profiles_id_fkey 
    FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
+   ```
+
+5. Regenerate Prisma Client:
+   ```bash
+   npx prisma generate
    ```
 
 ### Step 2: Verify Setup
