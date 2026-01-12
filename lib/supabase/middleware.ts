@@ -41,9 +41,63 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const {
+      data: { user: fetchedUser },
+      error,
+    } = await supabase.auth.getUser()
+    
+    // If refresh token is invalid, clear cookies and continue silently
+    if (error && (error.message?.includes("refresh_token_not_found") || error.code === "refresh_token_not_found")) {
+      // Clear invalid auth cookies - Supabase uses dynamic cookie names
+      // Pattern: sb-<project-ref>-auth-token (access and refresh)
+      const allCookies = request.cookies.getAll()
+      allCookies.forEach((cookie) => {
+        // Match Supabase auth cookie patterns
+        if (
+          cookie.name.includes("auth-token") ||
+          cookie.name.includes("access-token") ||
+          cookie.name.includes("refresh-token") ||
+          cookie.name.startsWith("sb-")
+        ) {
+          request.cookies.delete(cookie.name)
+          supabaseResponse.cookies.delete(cookie.name)
+        }
+      })
+      // Silently continue - user will be treated as unauthenticated
+      // Don't log to avoid spam
+      user = null
+    } else if (error) {
+      // Other auth errors - only log in development
+      if (process.env.NODE_ENV === "development" && !error.message?.includes("refresh_token")) {
+        console.warn("Auth error (non-critical):", error.message)
+      }
+      user = null
+    } else {
+      user = fetchedUser
+    }
+  } catch (error: any) {
+    // Handle refresh token errors silently - don't spam logs
+    if (error?.message?.includes("refresh_token") || error?.code === "refresh_token_not_found") {
+      // Clear invalid cookies
+      const allCookies = request.cookies.getAll()
+      allCookies.forEach((cookie) => {
+        if (
+          cookie.name.includes("auth-token") ||
+          cookie.name.includes("access-token") ||
+          cookie.name.includes("refresh-token") ||
+          cookie.name.startsWith("sb-")
+        ) {
+          request.cookies.delete(cookie.name)
+          supabaseResponse.cookies.delete(cookie.name)
+        }
+      })
+      // Silently continue - don't log
+    }
+    // Continue as unauthenticated user - don't log to avoid spam
+    user = null
+  }
 
   // Public routes that don't require authentication
   const publicRoutes = [
