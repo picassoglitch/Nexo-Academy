@@ -1,0 +1,33 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Light gray circle background -->
+  <circle cx="100" cy="100" r="100" fill="#e5e7eb"/>
+  
+  <!-- Network/connection icon with gradient from teal to purple -->
+  <!-- Scaled to fit better within the circle with padding -->
+  <g transform="translate(100, 80) scale(0.8)">
+    <!-- Left vertical line (teal) -->
+    <line x1="-50" y1="-30" x2="-50" y2="30" stroke="#06b6d4" stroke-width="2.5"/>
+    <circle cx="-50" cy="-30" r="5" fill="#06b6d4"/>
+    <circle cx="-50" cy="0" r="5" fill="#06b6d4"/>
+    <circle cx="-50" cy="30" r="5" fill="#06b6d4"/>
+    
+    <!-- Right vertical line (purple) -->
+    <line x1="50" y1="-30" x2="50" y2="30" stroke="#8b5cf6" stroke-width="2.5"/>
+    <circle cx="50" cy="-30" r="5" fill="#8b5cf6"/>
+    <circle cx="50" cy="0" r="5" fill="#8b5cf6"/>
+    <circle cx="50" cy="30" r="5" fill="#8b5cf6"/>
+    
+    <!-- Center node (lighter blue) -->
+    <circle cx="0" cy="0" r="7" fill="#6366f1"/>
+    
+    <!-- Connecting lines from center to corners -->
+    <line x1="0" y1="0" x2="-50" y2="-30" stroke="#06b6d4" stroke-width="2"/>
+    <line x1="0" y1="0" x2="-50" y2="30" stroke="#06b6d4" stroke-width="2"/>
+    <line x1="0" y1="0" x2="50" y2="-30" stroke="#8b5cf6" stroke-width="2"/>
+    <line x1="0" y1="0" x2="50" y2="30" stroke="#8b5cf6" stroke-width="2"/>
+    
+    <!-- Diagonal X lines -->
+    <line x1="-50" y1="-30" x2="50" y2="30" stroke="#6366f1" stroke-width="1.5" opacity="0.6"/>
+    <line x1="-50" y1="30" x2="50" y2="-30" stroke="#6366f1" stroke-width="1.5" opacity="0.6"/>
+  </g>
+</svg>

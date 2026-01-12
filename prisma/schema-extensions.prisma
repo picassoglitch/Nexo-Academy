@@ -1,0 +1,140 @@
+// Schema extensions for advanced analytics and course management
+// Add these models to your main schema.prisma
+
+model LessonView {
+  id                 String   @id @default(uuid())
+  userId             String
+  lessonId           String
+  viewedAt           DateTime @default(now())
+  timeSpentSeconds   Int      @default(0)
+  completed          Boolean  @default(false)
+  skipped            Boolean  @default(false)
+  replayCount        Int      @default(0)
+  dropOffTimestamp   Int?     // Seconds into lesson where user left
+  device             String?  // mobile, desktop
+  createdAt          DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId, viewedAt])
+  @@index([lessonId])
+  @@index([userId])
+  @@index([viewedAt])
+}
+
+model LessonFeedback {
+  id          String   @id @default(uuid())
+  userId      String
+  lessonId    String
+  wasClear    Boolean? // Yes/No feedback
+  emojiRating Int?     // 1-5 emoji rating
+  confusion   String? // Free text: "What confused you?"
+  createdAt   DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@index([userId])
+}
+
+model LessonVersion {
+  id          String   @id @default(uuid())
+  lessonId    String
+  version     Int      @default(1)
+  title       String
+  transcriptMd String?
+  videoUrl    String?
+  updatedBy   String?  // Admin user ID
+  updatedAt   DateTime @default(now())
+  changeLog   String?  // What changed
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, version])
+  @@index([lessonId])
+}
+
+model LessonState {
+  id          String   @id @default(uuid())
+  lessonId    String   @unique
+  state       String   @default("live") // draft, live, hidden, deprecated, locked
+  lockedUntil String?  // Lesson ID that must be completed first
+  dripDays    Int?     // Unlock after X days from enrollment
+  updatedAt   DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([state])
+}
+
+model SupportTicket {
+  id          String   @id @default(uuid())
+  userId      String
+  lessonId    String?
+  subject     String
+  message     String
+  status      String   @default("open") // open, in_progress, resolved, closed
+  response    String?
+  respondedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([userId])
+  @@index([lessonId])
+}
+
+model UserActivity {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String   // login, lesson_view, lesson_complete, purchase, etc.
+  metadata  Json?     // Additional data
+  device    String?  // mobile, desktop
+  country   String?
+  timezone  String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model PathAnalytics {
+  id                String   @id @default(uuid())
+  path              String   // PATH1, PATH2, etc.
+  userId            String
+  startedAt         DateTime @default(now())
+  completedAt       DateTime?
+  revenueGenerated  Int      @default(0) // In cents
+  timeToMonetization Int?    // Days to first revenue
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([path])
+  @@index([userId])
+}
+
+// Add these relations to existing models:
+
+// Add to User model:
+// lessonViews        LessonView[]
+// lessonFeedback     LessonFeedback[]
+// supportTickets     SupportTicket[]
+// userActivities     UserActivity[]
+// pathAnalytics      PathAnalytics[]
+
+// Add to Lesson model:
+// lessonViews        LessonView[]
+// lessonFeedback     LessonFeedback[]
+// lessonVersions     LessonVersion[]
+// lessonState        LessonState?
+// supportTickets     SupportTicket[]
+
+
