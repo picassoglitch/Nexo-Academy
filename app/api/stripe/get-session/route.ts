@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       finalTierName = tierInfo?.name || finalTier
     }
 
-    // Check if user has Supabase account
+    // Check if user has Supabase account AND email is confirmed
     const supabase = createServiceClient()
     let hasSupabaseAccount = false
     let needsAccountCreation = false
@@ -85,8 +85,10 @@ export async function GET(request: NextRequest) {
       const { data: existingUsers } = await supabase.auth.admin.listUsers()
       const existingUser = existingUsers?.users?.find((u) => u.email === userEmail)
       hasSupabaseAccount = !!existingUser
+      const emailConfirmed = !!existingUser?.email_confirmed_at
 
-      if (!hasSupabaseAccount) {
+      // If user doesn't have account OR email is not confirmed, they need activation code
+      if (!hasSupabaseAccount || !emailConfirmed) {
         needsAccountCreation = true
       }
     } else {

@@ -79,8 +79,9 @@ export async function POST(request: NextRequest) {
           
           console.log("   Tier from metadata:", tier, "Tier number:", tierNumber)
 
-          // Check if user has Supabase account (to determine if we need activation code)
+          // Check if user has Supabase account AND it's confirmed (to determine if we need activation code)
           let userHasAccount = false
+          let userEmailConfirmed = false
           try {
             const supabase = createServiceClient()
             const { data: existingUsers } = await supabase.auth.admin.listUsers()
@@ -88,10 +89,15 @@ export async function POST(request: NextRequest) {
               (u) => u.email?.toLowerCase() === userEmail.toLowerCase()
             )
             userHasAccount = !!existingUser
+            userEmailConfirmed = !!existingUser?.email_confirmed_at
+            // Only consider it a "real" account if email is confirmed
+            // If email is not confirmed, treat it as if they don't have an account (need activation code)
+            userHasAccount = userHasAccount && userEmailConfirmed
           } catch (supabaseError) {
             console.warn("Could not check Supabase account (non-critical):", supabaseError)
             // Assume user doesn't have account if we can't check
             userHasAccount = false
+            userEmailConfirmed = false
           }
 
           // Get or update user by email (more reliable than ID)
@@ -100,7 +106,7 @@ export async function POST(request: NextRequest) {
           })
 
           console.log("   User found in DB:", dbUser ? `Yes (ID: ${dbUser.id}, Current Tier: ${dbUser.tier})` : "No")
-          console.log("   User has Supabase account:", userHasAccount)
+          console.log("   User has Supabase account:", userHasAccount, "Email confirmed:", userEmailConfirmed)
 
           if (!dbUser) {
             // Create user if doesn't exist (tier 0 for now - will be activated with code)
