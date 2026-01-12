@@ -152,6 +152,10 @@ export async function POST(request: NextRequest) {
       cancel_url: `${siteUrl}/checkout?tier=${tier}&email=${encodeURIComponent(email)}&name=${encodeURIComponent(name || "")}`,
       // Allow promotion codes
       allow_promotion_codes: true,
+      // Enable automatic tax calculation (Stripe Tax)
+      automatic_tax: {
+        enabled: true,
+      },
     }
 
     // If user has Stripe customer ID, use it for recurring payments
