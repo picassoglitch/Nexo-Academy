@@ -51,20 +51,20 @@ enum ReferralStatus {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  name          String?
-  role          UserRole @default(USER)
-  tier          Int      @default(0) // 0=gratis, 1=starter, 2=pro, 3=operator
-  selectedPathId String? // Para starter: ID del módulo/path elegido (deprecated, usar selectedCourseId)
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String?
+  role             UserRole  @default(USER)
+  tier             Int       @default(0) // 0=gratis, 1=starter, 2=pro, 3=operator
+  selectedPathId   String? // Para starter: ID del módulo/path elegido (deprecated, usar selectedCourseId)
   selectedCourseId String? // Para starter: ID del curso elegido
-  mpCustomerId  String? // Stripe customer ID (field name kept for backward compatibility)
-  supabaseId    String? // Supabase Auth user ID
+  mpCustomerId     String? // Stripe customer ID (field name kept for backward compatibility)
+  supabaseId       String? // Supabase Auth user ID
   // Synced from Supabase Auth
-  emailConfirmed Boolean @default(false) // Synced from Supabase email_confirmed_at
+  emailConfirmed   Boolean   @default(false) // Synced from Supabase email_confirmed_at
   emailConfirmedAt DateTime? // When email was confirmed in Supabase
-  lastSignInAt  DateTime? // Last sign-in time from Supabase
-  createdAt     DateTime @default(now())
+  lastSignInAt     DateTime? // Last sign-in time from Supabase
+  createdAt        DateTime  @default(now())
 
   quizResponses     QuizResponse[]
   lessonProgress    LessonProgress[]
@@ -110,7 +110,7 @@ model Course {
   title         String
   description   String?
   published     Boolean  @default(false)
-  requiredTiers Json?   // Array of tier strings: ["ALL", "STARTER", "PRO", "OPERATOR"]
+  requiredTiers Json? // Array of tier strings: ["ALL", "STARTER", "PRO", "OPERATOR"]
   createdAt     DateTime @default(now())
 
   modules Module[]
@@ -143,22 +143,22 @@ model Lesson {
   isFreePreview     Boolean  @default(false)
   requiredTier      Tier     @default(STARTER)
   createdAt         DateTime @default(now())
-  
+
   // New fields for advanced lesson form
-  lessonType        String?  // "Texto Principal", "Video Principal", "Interactivo", "Mixto"
-  estimatedDuration Int?     // minutes
-  quizQuestions     String?  // JSON array of quiz questions
-  assignments       String?  // Markdown instructions
-  interactionPoints Int?     @default(0)
-  completionPoints  Int?     @default(100)
+  lessonType        String? // "Texto Principal", "Video Principal", "Interactivo", "Mixto"
+  estimatedDuration Int? // minutes
+  quizQuestions     String? // JSON array of quiz questions
+  assignments       String? // Markdown instructions
+  interactionPoints Int?    @default(0)
+  completionPoints  Int?    @default(100)
   badgeName         String?
-  badgeIcon         String?  // URL or base64
+  badgeIcon         String? // URL or base64
   completionMessage String?
   additionalReward  String?
-  prerequisites     String?  // JSON array of lesson IDs
-  tags              String?  // JSON array of tags
-  status            String?  @default("Borrador") // "Borrador", "Publicada", "Archivada"
-  attachments       String?  // JSON array of file attachments
+  prerequisites     String? // JSON array of lesson IDs
+  tags              String? // JSON array of tags
+  status            String? @default("Borrador") // "Borrador", "Publicada", "Archivada"
+  attachments       String? // JSON array of file attachments
 
   module         Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   lessonProgress LessonProgress[]
@@ -210,8 +210,8 @@ model Order {
   couponId   String?
   createdAt  DateTime        @default(now())
 
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  coupon          Coupon?         @relation(fields: [couponId], references: [id])
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon          Coupon?          @relation(fields: [couponId], references: [id])
   activationCodes ActivationCode[]
 
   @@index([userId])
@@ -415,19 +415,19 @@ model QuizConfig {
 }
 
 model ActivationCode {
-  id          String   @id @default(uuid())
-  code        String   @unique // Unique activation code (e.g., "NEXO-XXXX-XXXX")
-  tier        Int      // Tier to activate (1=STARTER, 2=PRO, 3=OPERATOR)
-  email       String?  // Email associated with payment (optional)
-  orderId     String?  // Stripe session/order ID
-  usedBy      String?  // User ID who used this code (can be used multiple times)
-  usedAt      DateTime? // When code was last used
-  useCount    Int      @default(0) // How many times code has been used
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime? // Optional expiration date
+  id        String    @id @default(uuid())
+  code      String    @unique // Unique activation code (e.g., "NEXO-XXXX-XXXX")
+  tier      Int // Tier to activate (1=STARTER, 2=PRO, 3=OPERATOR)
+  email     String? // Email associated with payment (optional)
+  orderId   String? // Stripe session/order ID
+  usedBy    String? // User ID who used this code (can be used multiple times)
+  usedAt    DateTime? // When code was last used
+  useCount  Int       @default(0) // How many times code has been used
+  createdAt DateTime  @default(now())
+  expiresAt DateTime? // Optional expiration date
 
   // Relations
-  order       Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   @@index([code])
   @@index([email])
