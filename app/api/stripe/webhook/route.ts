@@ -154,34 +154,33 @@ export async function POST(request: NextRequest) {
             },
           })
 
-          // Generate activation code if user doesn't have account
-          if (!userHasAccount) {
-            const { generateActivationCode } = await import("@/lib/activation-code")
-            let activationCode = generateActivationCode()
-            
-            // Ensure code is unique
-            let codeExists = await prisma.activationCode.findUnique({
+          // ALWAYS generate activation code - user will use it after creating account
+          // This allows payment without account, then user creates account and activates with code
+          const { generateActivationCode } = await import("@/lib/activation-code")
+          let activationCode = generateActivationCode()
+          
+          // Ensure code is unique
+          let codeExists = await prisma.activationCode.findUnique({
+            where: { code: activationCode },
+          })
+          let attempts = 0
+          while (codeExists && attempts < 10) {
+            activationCode = generateActivationCode()
+            codeExists = await prisma.activationCode.findUnique({
               where: { code: activationCode },
             })
-            let attempts = 0
-            while (codeExists && attempts < 10) {
-              activationCode = generateActivationCode()
-              codeExists = await prisma.activationCode.findUnique({
-                where: { code: activationCode },
-              })
-              attempts++
-            }
-
-            await prisma.activationCode.create({
-              data: {
-                code: activationCode,
-                tier: tierNumber,
-                email: userEmail,
-                orderId: order.id,
-              },
-            })
-            console.log(`✅ Generated activation code ${activationCode} for tier ${tierNumber} (${tier})`)
+            attempts++
           }
+
+          await prisma.activationCode.create({
+            data: {
+              code: activationCode,
+              tier: tierNumber,
+              email: userEmail,
+              orderId: order.id,
+            },
+          })
+          console.log(`✅ Generated activation code ${activationCode} for tier ${tierNumber} (${tier}) - user can activate after creating account`)
 
           // Create Supabase account AFTER payment confirmation
           let supabaseUserId: string | null = null

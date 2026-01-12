@@ -34,29 +34,22 @@ function CheckoutContent() {
   const [couponApplied, setCouponApplied] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const [showAccountForm, setShowAccountForm] = useState(false)
-  const [accountFormData, setAccountFormData] = useState({
-    email: "",
-    name: "",
-    password: "",
-    confirmPassword: "",
-  })
-  const [creatingAccount, setCreatingAccount] = useState(false)
-  const [accountCreated, setAccountCreated] = useState(false)
+  const [checkoutEmail, setCheckoutEmail] = useState("")
 
   useEffect(() => {
     const tierParam = searchParams.get("tier") || "STARTER"
     setTier(tierParam)
+    const emailParam = searchParams.get("email")
 
-    // Check if user is logged in - REQUIRED
+    // Check if user is logged in
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUser(data.user)
-        setShowAccountForm(false) // Hide form if user is logged in
+        setCheckoutEmail(data.user.email || emailParam || "")
       } else {
-        // User is not logged in - show account form
-        setShowAccountForm(true)
+        setUser(null)
+        setCheckoutEmail(emailParam || "")
       }
     })
   }, [searchParams])
@@ -109,45 +102,13 @@ function CheckoutContent() {
   const total = calculateTotal()
   const emailParam = searchParams.get("email")
   const nameParam = searchParams.get("name")
-  const checkoutEmail = user?.email || emailParam || accountFormData.email
 
-  // Initialize form with URL params if available
+  // Initialize email from URL params if available
   useEffect(() => {
-    if (emailParam && !accountFormData.email) {
-      setAccountFormData((prev) => ({ ...prev, email: emailParam }))
+    if (emailParam && !checkoutEmail) {
+      setCheckoutEmail(emailParam)
     }
-    if (nameParam && !accountFormData.name) {
-      setAccountFormData((prev) => ({ ...prev, name: nameParam }))
-    }
-  }, [emailParam, nameParam])
-
-  // Ensure account form is shown if user is not logged in
-  useEffect(() => {
-    if (!user) {
-      setShowAccountForm(true)
-    } else {
-      setShowAccountForm(false)
-    }
-  }, [user])
-
-  const handleValidateForm = () => {
-    if (!accountFormData.email || !accountFormData.password) {
-      alert("Por favor, completa todos los campos requeridos")
-      return false
-    }
-
-    if (accountFormData.password.length < 8) {
-      alert("La contraseña debe tener al menos 8 caracteres")
-      return false
-    }
-
-    if (accountFormData.password !== accountFormData.confirmPassword) {
-      alert("Las contraseñas no coinciden")
-      return false
-    }
-
-    return true
-  }
+  }, [emailParam])
 
   // Get key benefits for the selected plan
   const keyBenefits = planData.features
@@ -391,160 +352,45 @@ function CheckoutContent() {
                   </div>
                 </div>
 
-                {/* BLOCKER: Must be logged in to pay */}
-                {!user ? (
-                  <div className="space-y-4">
-                    <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-4">
-                      <p className="text-sm font-semibold text-red-800 mb-2">
-                        ⚠️ Debes crear una cuenta para continuar con el pago
-                      </p>
-                      <p className="text-xs text-red-700">
-                        Para proteger tu compra y asegurar tu acceso, necesitas crear una cuenta antes de proceder con el pago.
+                {/* Payment - No account required, just email */}
+                <div className="space-y-4">
+                  {!user && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                      <p className="text-sm text-blue-800">
+                        💡 <strong>Puedes pagar sin cuenta.</strong> Después del pago recibirás un código de activación para crear tu cuenta y activar tu plan.
                       </p>
                     </div>
-
-                    {/* Account Creation Form */}
-                    {showAccountForm && !accountCreated ? (
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault()
-                          if (handleValidateForm()) {
-                            // Mark form as validated, show payment button
-                            setAccountCreated(true)
-                            setShowAccountForm(false)
-                          }
-                        }}
-                        className="space-y-4"
-                      >
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                          <p className="text-sm text-blue-800">
-                            <strong>Paso 1:</strong> Crea tu cuenta. Tu cuenta se activará después de que el pago sea exitoso.
-                          </p>
-                        </div>
-
-                        <div>
-                          <Label htmlFor="email">Email *</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={accountFormData.email}
-                            onChange={(e) =>
-                              setAccountFormData((prev) => ({ ...prev, email: e.target.value }))
-                            }
-                            placeholder="tu@email.com"
-                            required
-                            className="mt-2"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="name">Nombre (opcional)</Label>
-                          <Input
-                            id="name"
-                            type="text"
-                            value={accountFormData.name}
-                            onChange={(e) =>
-                              setAccountFormData((prev) => ({ ...prev, name: e.target.value }))
-                            }
-                            placeholder="Tu nombre"
-                            className="mt-2"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="password">Contraseña *</Label>
-                          <Input
-                            id="password"
-                            type="password"
-                            value={accountFormData.password}
-                            onChange={(e) =>
-                              setAccountFormData((prev) => ({ ...prev, password: e.target.value }))
-                            }
-                            placeholder="Mínimo 8 caracteres"
-                            required
-                            minLength={8}
-                            autoComplete="new-password"
-                            className="mt-2"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="confirmPassword">Confirmar Contraseña *</Label>
-                          <Input
-                            id="confirmPassword"
-                            type="password"
-                            value={accountFormData.confirmPassword}
-                            onChange={(e) =>
-                              setAccountFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))
-                            }
-                            placeholder="Repite tu contraseña"
-                            required
-                            minLength={8}
-                            autoComplete="new-password"
-                            className="mt-2"
-                          />
-                        </div>
-
-                        <Button
-                          type="submit"
-                          disabled={creatingAccount}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg font-semibold"
-                          size="lg"
-                        >
-                          {creatingAccount ? (
-                            <>
-                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                              Validando...
-                            </>
-                          ) : (
-                            "Continuar con el pago"
-                          )}
-                        </Button>
-
-                        <p className="text-xs text-gray-500 text-center">
-                          Al crear una cuenta, aceptas nuestros términos y condiciones
-                        </p>
-                      </form>
-                    ) : accountCreated ? (
-                      <div className="space-y-4">
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <p className="text-sm text-green-800 mb-2">
-                            ✓ Datos validados. Tu cuenta se creará automáticamente después de que el pago sea confirmado.
-                          </p>
-                          <p className="text-xs text-green-700">
-                            Email: {accountFormData.email}
-                          </p>
-                        </div>
-                        <StripeCheckout
-                          amount={total}
-                          email={accountFormData.email}
-                          name={accountFormData.name || nameParam || undefined}
-                          tier={tier}
-                          couponCode={coupon}
-                          password={accountFormData.password}
-                          onError={(error) => {
-                            console.error("Payment error:", error)
-                            alert(`Error al procesar el pago: ${error?.message || "Error desconocido"}`)
-                          }}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                ) : (
+                  )}
+                  
                   <div>
-                    <StripeCheckout
-                      amount={total}
-                      email={checkoutEmail}
-                      name={accountFormData.name || nameParam || user?.user_metadata?.name || undefined}
-                      tier={tier}
-                      couponCode={coupon}
-                      onError={(error) => {
-                        console.error("Payment error:", error)
-                        alert(`Error al procesar el pago: ${error?.message || "Error desconocido"}`)
-                      }}
+                    <Label htmlFor="checkout-email">Email para el pago *</Label>
+                    <Input
+                      id="checkout-email"
+                      type="email"
+                      value={checkoutEmail}
+                      onChange={(e) => setCheckoutEmail(e.target.value)}
+                      placeholder="tu@email.com"
+                      required
+                      className="mt-2"
+                      autoComplete="email"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Te enviaremos el código de activación a este email
+                    </p>
                   </div>
-                )}
+
+                  <StripeCheckout
+                    amount={total}
+                    email={checkoutEmail}
+                    name={nameParam || user?.user_metadata?.name || undefined}
+                    tier={tier}
+                    couponCode={coupon}
+                    onError={(error) => {
+                      console.error("Payment error:", error)
+                      alert(`Error al procesar el pago: ${error?.message || "Error desconocido"}`)
+                    }}
+                  />
+                </div>
 
                 {/* Trust Badges */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
