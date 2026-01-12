@@ -84,8 +84,8 @@ function CheckoutSuccessContent() {
             }
 
             if (verifyData.processed || retries >= maxRetries) {
-              // Fetch activation code if needed
-              if (data.needsAccountCreation) {
+              // Fetch activation code if needed (only if webhook has processed)
+              if (data.needsAccountCreation && verifyData.processed) {
                 try {
                   const activationCodeResponse = await fetch(`/api/activation/get-by-session?session_id=${sessionId}`)
                   const activationCodeData = await activationCodeResponse.json()
@@ -93,7 +93,12 @@ function CheckoutSuccessContent() {
                     data.activationCode = activationCodeData.code
                     console.log("✅ Activation code retrieved:", activationCodeData.code)
                   } else {
-                    console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
+                    // Order might not exist yet - this is OK, we'll retry
+                    if (activationCodeResponse.status === 404) {
+                      console.log("Order not found yet, will retry on next poll")
+                    } else {
+                      console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
+                    }
                   }
                 } catch (activationError) {
                   console.error("Error fetching activation code:", activationError)
@@ -113,7 +118,7 @@ function CheckoutSuccessContent() {
           } else {
             // Max retries reached, show anyway
             if (response.ok && data.tierName) {
-              // Fetch activation code if needed
+              // Fetch activation code if needed (even if webhook hasn't processed, try anyway)
               if (data.needsAccountCreation) {
                 try {
                   const activationCodeResponse = await fetch(`/api/activation/get-by-session?session_id=${sessionId}`)
@@ -122,7 +127,12 @@ function CheckoutSuccessContent() {
                     data.activationCode = activationCodeData.code
                     console.log("✅ Activation code retrieved (max retries):", activationCodeData.code)
                   } else {
-                    console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
+                    // Order might not exist yet - this is OK
+                    if (activationCodeResponse.status === 404) {
+                      console.log("Order not found yet (webhook may not have processed)")
+                    } else {
+                      console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
+                    }
                   }
                 } catch (activationError) {
                   console.error("Error fetching activation code:", activationError)
