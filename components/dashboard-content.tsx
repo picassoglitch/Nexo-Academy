@@ -37,6 +37,7 @@ import XPCounter from "./xp-counter"
 import BottomNav from "./bottom-nav"
 import DailyChallenge from "./daily-challenge"
 import { SubscriptionManagement } from "./subscription-management"
+import { ActivationCodeInput } from "./activation-code-input"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 

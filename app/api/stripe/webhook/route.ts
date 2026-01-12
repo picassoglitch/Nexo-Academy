@@ -79,48 +79,55 @@ export async function POST(request: NextRequest) {
           
           console.log("   Tier from metadata:", tier, "Tier number:", tierNumber)
 
+          // Check if user has Supabase account (to determine if we need activation code)
+          let userHasAccount = false
+          try {
+            const supabase = createServiceClient()
+            const { data: existingUsers } = await supabase.auth.admin.listUsers()
+            const existingUser = existingUsers?.users?.find(
+              (u) => u.email?.toLowerCase() === userEmail.toLowerCase()
+            )
+            userHasAccount = !!existingUser
+          } catch (supabaseError) {
+            console.warn("Could not check Supabase account (non-critical):", supabaseError)
+            // Assume user doesn't have account if we can't check
+            userHasAccount = false
+          }
+
           // Get or update user by email (more reliable than ID)
-          
           let dbUser = await prisma.user.findUnique({
             where: { email: userEmail },
           })
 
           console.log("   User found in DB:", dbUser ? `Yes (ID: ${dbUser.id}, Current Tier: ${dbUser.tier})` : "No")
+          console.log("   User has Supabase account:", userHasAccount)
 
           if (!dbUser) {
-            // Create user if doesn't exist
+            // Create user if doesn't exist (tier 0 for now - will be activated with code)
             dbUser = await prisma.user.create({
               data: {
                 email: userEmail,
                 name: metadata.user_name || null,
-                tier: tierNumber,
+                tier: 0, // Will be activated with code
               },
             })
-            console.log(`✅ Created new user with tier ${tierNumber} (${tier}) for:`, userEmail)
+            console.log(`✅ Created new user (tier 0, pending activation) for:`, userEmail)
           } else {
-            // Update tier for existing user - only if new tier is higher
-            const currentTier = dbUser.tier || 0
-            const newTier = Math.max(currentTier, tierNumber) // Always use the highest tier
-            
-            console.log(`   Current tier: ${currentTier}, New tier from payment: ${tierNumber}, Final tier: ${newTier}`)
-            
-            if (newTier > currentTier) {
-              dbUser = await prisma.user.update({
-                where: { id: dbUser.id },
-                data: { tier: newTier },
-              })
-              console.log(`✅ Updated user tier from ${currentTier} to ${newTier} (${tier}) for:`, userEmail)
-            } else {
-              console.log(`ℹ️ User already has tier ${currentTier} (>= ${tierNumber}), keeping current tier for:`, userEmail)
+            // If user already has account, update tier immediately
+            if (userHasAccount) {
+              const currentTier = dbUser.tier || 0
+              const newTier = Math.max(currentTier, tierNumber)
+              
+              if (newTier > currentTier) {
+                dbUser = await prisma.user.update({
+                  where: { id: dbUser.id },
+                  data: { tier: newTier },
+                })
+                console.log(`✅ Updated user tier from ${currentTier} to ${newTier} (${tier}) for:`, userEmail)
+              }
             }
+            // If user doesn't have account, keep tier at 0 - will be activated with code
           }
-          
-          // Verify the update was successful
-          const verifyUser = await prisma.user.findUnique({
-            where: { email: userEmail },
-            select: { tier: true },
-          })
-          console.log("   ✅ Verified user tier in DB after update:", verifyUser?.tier)
 
           // Save Stripe customer ID for recurring payments
           if (session.customer && typeof session.customer === "string" && !dbUser.mpCustomerId) {
@@ -131,7 +138,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Create order
-          await prisma.order.create({
+          const order = await prisma.order.create({
             data: {
               userId: dbUser.id,
               externalId: session.id,
@@ -140,6 +147,35 @@ export async function POST(request: NextRequest) {
               currency: "USD",
             },
           })
+
+          // Generate activation code if user doesn't have account
+          if (!userHasAccount) {
+            const { generateActivationCode } = await import("@/lib/activation-code")
+            let activationCode = generateActivationCode()
+            
+            // Ensure code is unique
+            let codeExists = await prisma.activationCode.findUnique({
+              where: { code: activationCode },
+            })
+            let attempts = 0
+            while (codeExists && attempts < 10) {
+              activationCode = generateActivationCode()
+              codeExists = await prisma.activationCode.findUnique({
+                where: { code: activationCode },
+              })
+              attempts++
+            }
+
+            await prisma.activationCode.create({
+              data: {
+                code: activationCode,
+                tier: tierNumber,
+                email: userEmail,
+                orderId: order.id,
+              },
+            })
+            console.log(`✅ Generated activation code ${activationCode} for tier ${tierNumber} (${tier})`)
+          }
 
           // Create Supabase account AFTER payment confirmation
           let supabaseUserId: string | null = null

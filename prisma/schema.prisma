@@ -210,8 +210,9 @@ model Order {
   couponId   String?
   createdAt  DateTime        @default(now())
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  coupon Coupon? @relation(fields: [couponId], references: [id])
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon          Coupon?         @relation(fields: [couponId], references: [id])
+  activationCodes ActivationCode[]
 
   @@index([userId])
   @@index([externalId])
@@ -411,4 +412,24 @@ model QuizConfig {
   updatedBy String? // Admin user ID
 
   @@index([key])
+}
+
+model ActivationCode {
+  id          String   @id @default(uuid())
+  code        String   @unique // Unique activation code (e.g., "NEXO-XXXX-XXXX")
+  tier        Int      // Tier to activate (1=STARTER, 2=PRO, 3=OPERATOR)
+  email       String?  // Email associated with payment (optional)
+  orderId     String?  // Stripe session/order ID
+  usedBy      String?  // User ID who used this code (can be used multiple times)
+  usedAt      DateTime? // When code was last used
+  useCount    Int      @default(0) // How many times code has been used
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime? // Optional expiration date
+
+  // Relations
+  order       Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([code])
+  @@index([email])
+  @@index([orderId])
 }
