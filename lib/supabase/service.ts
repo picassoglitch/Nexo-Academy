@@ -25,12 +25,17 @@ export function createServiceClient() {
     console.warn("Service role key doesn't look like a JWT token. Verify SUPABASE_SERVICE_ROLE_KEY is correct.")
   }
 
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  })
+  try {
+    return createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  } catch (error: any) {
+    // If client creation fails, throw a more descriptive error
+    throw new Error(`Failed to create Supabase client: ${error?.message || "Unknown error"}`)
+  }
 }
 
 

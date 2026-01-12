@@ -84,21 +84,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user has Supabase account (optional - don't block checkout if this fails)
+    // This is completely optional - we'll create the account after payment if needed
     try {
-      const supabase = createServiceClient()
-      const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers()
-      
-      if (listError) {
-        console.warn("Could not verify Supabase account (non-critical):", listError.message)
-      } else {
-        const existingUser = existingUsers?.users?.find((u: any) => u.email === email)
-        if (!existingUser) {
-          console.warn("User does not have Supabase account. Payment will proceed but account creation may be needed.")
+      // Only try to verify if Supabase is properly configured
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const supabase = createServiceClient()
+        const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers()
+        
+        if (listError) {
+          console.warn("Could not verify Supabase account (non-critical):", listError.message)
+        } else {
+          const existingUser = existingUsers?.users?.find((u: any) => u.email === email)
+          if (!existingUser) {
+            console.warn("User does not have Supabase account. Payment will proceed but account creation may be needed.")
+          }
         }
+      } else {
+        console.warn("Supabase not configured - skipping user verification (non-critical)")
       }
     } catch (supabaseError: any) {
-      // Don't block checkout if Supabase verification fails
-      console.warn("Supabase verification failed (non-critical, proceeding with checkout):", supabaseError?.message || "Unknown error")
+      // Don't block checkout if Supabase verification fails - this is completely optional
+      const errorMsg = supabaseError?.message || supabaseError?.toString() || "Unknown error"
+      console.warn("Supabase verification failed (non-critical, proceeding with checkout):", errorMsg)
+      // Continue with checkout - account will be created after payment if needed
     }
 
     const tierInfo = TIERS[tier as keyof typeof TIERS]
