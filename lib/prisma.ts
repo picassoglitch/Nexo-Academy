@@ -1,5 +1,5 @@
 // Import PrismaClient - Next.js/Turbopack will handle TypeScript transpilation
-import { PrismaClient } from "../.prisma/client/client"
+import { PrismaClient } from "@prisma/client"
 import { Pool } from "pg"
 import { PrismaPg } from "@prisma/adapter-pg"
 
