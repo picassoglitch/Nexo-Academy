@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2, Loader2 } from "lucide-react"
+import { CheckCircle2, Loader2, Copy } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { createClient } from "@/lib/supabase/client"
 
 interface SessionInfo {
@@ -16,6 +17,7 @@ interface SessionInfo {
   isExistingUser: boolean
   hasSupabaseAccount: boolean
   needsAccountCreation: boolean
+  activationCode?: string | null
 }
 
 function CheckoutSuccessContent() {
@@ -82,6 +84,22 @@ function CheckoutSuccessContent() {
             }
 
             if (verifyData.processed || retries >= maxRetries) {
+              // Fetch activation code if needed
+              if (data.needsAccountCreation) {
+                try {
+                  const activationCodeResponse = await fetch(`/api/activation/get-by-session?sessionId=${sessionId}`)
+                  const activationCodeData = await activationCodeResponse.json()
+                  if (activationCodeResponse.ok && activationCodeData.code) {
+                    data.activationCode = activationCodeData.code
+                    console.log("✅ Activation code retrieved:", activationCodeData.code)
+                  } else {
+                    console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
+                  }
+                } catch (activationError) {
+                  console.error("Error fetching activation code:", activationError)
+                }
+              }
+              
               setSessionInfo(data)
               setVerified(true)
               setLoading(false)
@@ -95,6 +113,22 @@ function CheckoutSuccessContent() {
           } else {
             // Max retries reached, show anyway
             if (response.ok && data.tierName) {
+              // Fetch activation code if needed
+              if (data.needsAccountCreation) {
+                try {
+                  const activationCodeResponse = await fetch(`/api/activation/get-by-session?sessionId=${sessionId}`)
+                  const activationCodeData = await activationCodeResponse.json()
+                  if (activationCodeResponse.ok && activationCodeData.code) {
+                    data.activationCode = activationCodeData.code
+                    console.log("✅ Activation code retrieved (max retries):", activationCodeData.code)
+                  } else {
+                    console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
+                  }
+                } catch (activationError) {
+                  console.error("Error fetching activation code:", activationError)
+                }
+              }
+              
               setSessionInfo(data)
               setVerified(true)
             }
@@ -120,51 +154,14 @@ function CheckoutSuccessContent() {
   const handleCreateAccount = async () => {
     if (!sessionInfo) return
 
-    setCreatingAccount(true)
+    // Redirect to signup page with email and activation code pre-filled
+    router.push(`/signup?email=${encodeURIComponent(sessionInfo.userEmail)}&tier=${sessionInfo.tier}&activationCode=${sessionInfo.activationCode || ''}`)
+  }
 
-    try {
-      // Generate a random password (user will be able to change it later)
-      const tempPassword = Math.random().toString(36).slice(-12) + "A1!"
-
-      const response = await fetch("/api/auth/create-account-after-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: sessionInfo.userEmail,
-          name: sessionInfo.userName,
-          password: tempPassword,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setAccountCreated(true)
-        
-        // Sign in the user
-        const supabase = createClient()
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: sessionInfo.userEmail,
-          password: tempPassword,
-        })
-
-        if (!signInError) {
-          // Redirect to dashboard after successful login
-          setTimeout(() => {
-            router.push("/dashboard?payment=success&onboarding=complete")
-          }, 1500)
-        } else {
-          // If sign in fails, redirect to login page
-          router.push(`/login?email=${encodeURIComponent(sessionInfo.userEmail)}&payment=success`)
-        }
-      } else {
-        alert(`Error: ${data.error || "No se pudo crear la cuenta"}`)
-        setCreatingAccount(false)
-      }
-    } catch (error: any) {
-      console.error("Error creating account:", error)
-      alert(`Error: ${error.message || "Error desconocido"}`)
-      setCreatingAccount(false)
+  const copyActivationCode = () => {
+    if (sessionInfo?.activationCode) {
+      navigator.clipboard.writeText(sessionInfo.activationCode)
+      alert("Código de activación copiado al portapapeles!")
     }
   }
 
@@ -206,17 +203,56 @@ function CheckoutSuccessContent() {
               Tu pago ha sido procesado exitosamente. Ya tienes acceso como <strong>{tierName}</strong>.
             </p>
 
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
-              <h3 className="font-semibold mb-2 text-yellow-800">⚠️ Confirmación de Email Requerida</h3>
-              <p className="text-sm text-yellow-700">
-                Hemos enviado un email de confirmación a <strong>{sessionInfo?.userEmail || "tu correo"}</strong>. 
-                Por favor, revisa tu bandeja de entrada y haz clic en el enlace de confirmación para activar tu cuenta 
-                y acceder a tu dashboard.
-              </p>
-              <p className="text-xs text-yellow-600 mt-2">
-                Si no recibes el email, revisa tu carpeta de spam o contacta a soporte.
-              </p>
-            </div>
+            {sessionInfo?.needsAccountCreation && sessionInfo?.activationCode ? (
+              <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4 space-y-3">
+                <h3 className="font-semibold mb-2 text-purple-800">🎉 ¡Tu código de activación!</h3>
+                <p className="text-sm text-purple-700">
+                  Guarda este código. Lo necesitarás para activar tu plan después de crear tu cuenta.
+                </p>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="activation-code"
+                    type="text"
+                    value={sessionInfo.activationCode}
+                    readOnly
+                    className="font-mono text-center bg-purple-100 border-purple-300"
+                  />
+                  <Button variant="secondary" size="icon" onClick={copyActivationCode}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-purple-600 mt-2">
+                  También hemos enviado este código a <strong>{sessionInfo.userEmail}</strong>.
+                </p>
+                <Button 
+                  onClick={handleCreateAccount}
+                  size="lg" 
+                  className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white"
+                  disabled={creatingAccount}
+                >
+                  {creatingAccount ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creando cuenta...
+                    </>
+                  ) : (
+                    "Crear Cuenta Ahora"
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                <h3 className="font-semibold mb-2 text-yellow-800">⚠️ Confirmación de Email Requerida</h3>
+                <p className="text-sm text-yellow-700">
+                  Hemos enviado un email de confirmación a <strong>{sessionInfo?.userEmail || "tu correo"}</strong>. 
+                  Por favor, revisa tu bandeja de entrada y haz clic en el enlace de confirmación para activar tu cuenta 
+                  y acceder a tu dashboard.
+                </p>
+                <p className="text-xs text-yellow-600 mt-2">
+                  Si no recibes el email, revisa tu carpeta de spam o contacta a soporte.
+                </p>
+              </div>
+            )}
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h3 className="font-semibold mb-2">🎁 Bonus de Bienvenida</h3>
