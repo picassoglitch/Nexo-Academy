@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServiceClient } from "@/lib/supabase/service"
 import { Resend } from "resend"
 import { getEmailSender } from "@/lib/email-config"
+import { checkRateLimit, rateLimitExceededResponse, RATE_LIMITS } from "@/lib/rate-limit"
 
 export const dynamic = "force-dynamic"
 
@@ -37,14 +38,14 @@ export async function POST(request: NextRequest) {
       // Don't reveal if user exists for security, but log for debugging
       console.log("User not found for email:", email)
       return NextResponse.json(
-        { error: "No se encontró una cuenta con este email." },
+        { error: "No se encontrÃ³ una cuenta con este email." },
         { status: 404 }
       )
     }
 
     if (user.email_confirmed_at) {
       return NextResponse.json(
-        { error: "Este email ya está confirmado. Puedes iniciar sesión normalmente." },
+        { error: "Este email ya estÃ¡ confirmado. Puedes iniciar sesiÃ³n normalmente." },
         { status: 400 }
       )
     }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       if (linkError || !linkData?.properties?.action_link) {
         console.error("Error generating confirmation link:", linkError)
         return NextResponse.json(
-          { error: "Error al generar el enlace de confirmación. Por favor, intenta de nuevo." },
+          { error: "Error al generar el enlace de confirmaciÃ³n. Por favor, intenta de nuevo." },
           { status: 500 }
         )
       }
@@ -72,14 +73,14 @@ export async function POST(request: NextRequest) {
     } catch (linkGenError: any) {
       console.error("Exception generating confirmation link:", linkGenError)
       return NextResponse.json(
-        { error: "Error al generar el enlace de confirmación. Por favor, intenta de nuevo." },
+        { error: "Error al generar el enlace de confirmaciÃ³n. Por favor, intenta de nuevo." },
         { status: 500 }
       )
     }
 
     if (!confirmationLink) {
       return NextResponse.json(
-        { error: "No se pudo generar el enlace de confirmación. Por favor, intenta de nuevo." },
+        { error: "No se pudo generar el enlace de confirmaciÃ³n. Por favor, intenta de nuevo." },
         { status: 500 }
       )
     }
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
                 <p style="font-size: 16px;">Hola,</p>
                 
                 <p style="font-size: 16px;">
-                  Has solicitado un nuevo enlace de confirmación para tu cuenta de Nexo.
+                  Has solicitado un nuevo enlace de confirmaciÃ³n para tu cuenta de Nexo.
                 </p>
                 
                 <div style="text-align: center; margin: 30px 0;">
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
                 </p>
                 
                 <p style="font-size: 14px; color: #666; margin-top: 20px;">
-                  ¡Nos vemos dentro!<br>
+                  Â¡Nos vemos dentro!<br>
                   El equipo de Nexo
                 </p>
               </div>
@@ -146,24 +147,24 @@ export async function POST(request: NextRequest) {
           `,
         })
 
-        console.log("✅ Email sent successfully via Resend to:", email, "Result:", emailResult)
+        console.log("âœ… Email sent successfully via Resend to:", email, "Result:", emailResult)
         
         return NextResponse.json({
           success: true,
-          message: "Se ha enviado un nuevo email de confirmación. Por favor, revisa tu bandeja de entrada (y la carpeta de spam).",
+          message: "Se ha enviado un nuevo email de confirmaciÃ³n. Por favor, revisa tu bandeja de entrada (y la carpeta de spam).",
         })
       } catch (emailError: any) {
-        console.error("❌ Error sending email via Resend:", emailError)
+        console.error("âŒ Error sending email via Resend:", emailError)
         // Continue to try Supabase email sending as fallback
       }
     }
 
     // Resend is required - return error if not configured
     if (!resend) {
-      console.error("❌ RESEND_API_KEY not configured, cannot send email")
+      console.error("âŒ RESEND_API_KEY not configured, cannot send email")
       return NextResponse.json(
         { 
-          error: "El servicio de email no está configurado. Por favor, contacta al soporte técnico.",
+          error: "El servicio de email no estÃ¡ configurado. Por favor, contacta al soporte tÃ©cnico.",
           link: confirmationLink // Provide link as fallback for manual use
         },
         { status: 500 }
@@ -173,17 +174,18 @@ export async function POST(request: NextRequest) {
     // If we get here, Resend failed but is configured
     return NextResponse.json(
       { 
-        error: "Error al enviar el email. Por favor, intenta de nuevo más tarde o contacta al soporte.",
+        error: "Error al enviar el email. Por favor, intenta de nuevo mÃ¡s tarde o contacta al soporte.",
         link: confirmationLink // Provide link as fallback
       },
       { status: 500 }
     )
   } catch (error: any) {
-    console.error("❌ Error in resend confirmation:", error)
+    console.error("âŒ Error in resend confirmation:", error)
     return NextResponse.json(
       { error: "Error inesperado. Por favor, intenta de nuevo." },
       { status: 500 }
     )
   }
 }
+
 
