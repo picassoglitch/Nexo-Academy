@@ -83,13 +83,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Verify user has Supabase account (should exist if created before payment)
-    const supabase = createServiceClient()
-    const { data: existingUsers } = await supabase.auth.admin.listUsers()
-    const existingUser = existingUsers?.users?.find((u: any) => u.email === email)
-
-    if (!existingUser) {
-      console.warn("User does not have Supabase account. Payment will proceed but account creation may be needed.")
+    // Verify user has Supabase account (optional - don't block checkout if this fails)
+    try {
+      const supabase = createServiceClient()
+      const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers()
+      
+      if (listError) {
+        console.warn("Could not verify Supabase account (non-critical):", listError.message)
+      } else {
+        const existingUser = existingUsers?.users?.find((u: any) => u.email === email)
+        if (!existingUser) {
+          console.warn("User does not have Supabase account. Payment will proceed but account creation may be needed.")
+        }
+      }
+    } catch (supabaseError: any) {
+      // Don't block checkout if Supabase verification fails
+      console.warn("Supabase verification failed (non-critical, proceeding with checkout):", supabaseError?.message || "Unknown error")
     }
 
     const tierInfo = TIERS[tier as keyof typeof TIERS]
