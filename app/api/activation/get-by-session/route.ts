@@ -15,20 +15,15 @@ export async function GET(request: NextRequest) {
 
     console.log("🔍 Looking for activation code for session:", sessionId)
 
-    // Find order by Stripe session ID
+    // First, try to find order by Stripe session ID
     let order
     try {
       order = await prisma.order.findUnique({
         where: { externalId: sessionId },
-        include: {
-          activationCodes: {
-            orderBy: { createdAt: "desc" },
-            take: 1, // Get the most recent code
-          },
-        },
       })
     } catch (prismaError: any) {
       console.error("❌ Prisma error finding order:", prismaError)
+      console.error("Error details:", JSON.stringify(prismaError, null, 2))
       return NextResponse.json(
         { error: "Error al buscar la orden", details: prismaError?.message },
         { status: 500 }
@@ -43,9 +38,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log("✅ Order found:", order.id, "Activation codes count:", order.activationCodes.length)
+    console.log("✅ Order found:", order.id)
 
-    const activationCode = order.activationCodes[0]
+    // Now try to find activation code by orderId (more reliable than include)
+    let activationCode
+    try {
+      activationCode = await prisma.activationCode.findFirst({
+        where: { orderId: order.id },
+        orderBy: { createdAt: "desc" },
+      })
+    } catch (prismaError: any) {
+      console.error("❌ Prisma error finding activation code:", prismaError)
+      console.error("Error details:", JSON.stringify(prismaError, null, 2))
+      return NextResponse.json(
+        { error: "Error al buscar el código de activación", details: prismaError?.message },
+        { status: 500 }
+      )
+    }
 
     if (!activationCode) {
       console.log("⚠️ No activation code found for order:", order.id)
