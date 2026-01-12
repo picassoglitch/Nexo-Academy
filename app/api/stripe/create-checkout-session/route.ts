@@ -3,6 +3,7 @@ import Stripe from "stripe"
 import { prisma } from "@/lib/prisma"
 import { TIERS } from "@/lib/constants"
 import { createServiceClient } from "@/lib/supabase/service"
+import { detectCurrencyFromRequest } from "@/lib/currency-detection"
 
 // Validate Stripe secret key
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -120,6 +121,10 @@ export async function POST(request: NextRequest) {
     // Get site URL
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
+    // Detect user's currency from request headers
+    const currency = detectCurrencyFromRequest(request)
+    console.log("Detected currency:", currency)
+
     // Handle coupon if provided
     let couponId: string | undefined
     if (couponCode) {
@@ -140,12 +145,12 @@ export async function POST(request: NextRequest) {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: currency, // Use detected currency
             product_data: {
               name: `Nexo - ${tierInfo.name}`,
               description: tierInfo.description,
             },
-            unit_amount: amount, // Amount in cents
+            unit_amount: amount, // Amount in cents (or smallest currency unit)
             recurring: {
               interval: "month", // Monthly subscription
             },
@@ -155,6 +160,12 @@ export async function POST(request: NextRequest) {
       ],
       customer_email: email,
       locale: "es", // Set locale to Spanish to avoid i18n errors
+      // Let Stripe detect customer's preferred currency/locale
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "automatic",
+        },
+      },
       metadata: {
         user_id: dbUser.id,
         user_email: email,

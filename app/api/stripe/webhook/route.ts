@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
               externalId: session.id,
               status: "APPROVED",
               amount: session.amount_total || 0,
-              currency: "USD",
+              currency: session.currency?.toUpperCase() || "USD",
             },
           })
 
