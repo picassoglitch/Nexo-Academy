@@ -61,8 +61,8 @@ export const QUIZ_PLAN_OPTIONS: QuizPlanOption[] = [
     name: "Scaler",
     icon: "⚡",
     tagline: "Para quienes ya están operando",
-    price: 3999,
-    oldPrice: 7999,
+    price: 399900, // $3,999 MXN in centavos
+    oldPrice: 799900, // $7,999 MXN in centavos
     currency: "MXN",
     features: [
       { text: "Todo lo del Pro", included: true },
