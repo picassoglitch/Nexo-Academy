@@ -97,10 +97,46 @@ Para habilitar pagos recurrentes (suscripciones):
 2. Usa `price_data` con `recurring` o crea productos/precios en Stripe Dashboard
 3. El webhook manejará eventos de suscripción automáticamente
 
+## 💰 Stripe Tax (Impuestos Automáticos)
+
+✅ **Configurado automáticamente** - Los impuestos se calculan y aplican automáticamente en todas las transacciones.
+
+- **Habilitado en Checkout Sessions**: `automatic_tax: { enabled: true }`
+- Stripe Tax calcula automáticamente los impuestos según la ubicación del cliente
+- Se aplica a suscripciones, pagos únicos y renovaciones
+- Compatible con múltiples jurisdicciones y tipos de impuestos
+
+### Configuración en Stripe Dashboard
+
+1. Ve a [Stripe Dashboard](https://dashboard.stripe.com/settings/tax)
+2. Activa **Stripe Tax** en la sección de impuestos
+3. Configura tus productos como servicios digitales si aplica
+4. Los impuestos se calcularán automáticamente en cada transacción
+
+### Para Transacciones del Dashboard
+
+Cuando crees transacciones directamente en el Stripe Dashboard:
+
+1. Ve a **Settings** → **Tax**
+2. Activa **"Use automatic tax"** para transacciones del Dashboard
+3. Esto aplica a:
+   - Invoices creadas en Dashboard
+   - Subscriptions creadas en Dashboard
+   - Quotes creadas en Dashboard
+   - Payment Links creadas en Dashboard
+
+### Notas sobre Impuestos
+
+- Los impuestos se calculan automáticamente según la ubicación del cliente
+- Se muestran claramente en el checkout de Stripe
+- Se incluyen en los recibos y facturas automáticamente
+- No necesitas configurar nada adicional en el código
+
 ## 📝 Notas
 
 - Los pagos se procesan en la página hospedada por Stripe (más seguro)
 - El webhook es crítico para actualizar la base de datos después del pago
 - Los customer IDs se guardan en `mpCustomerId` (reutilizando el campo existente)
 - Los pagos se guardan en la tabla `orders` con `externalId` = session ID
+- **Stripe Tax está habilitado** - Los impuestos se calculan automáticamente
 
