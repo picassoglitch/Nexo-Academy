@@ -14,6 +14,7 @@ export function ActivationCodeInput() {
     valid: boolean
     tierName?: string
     error?: string
+    useCount?: number
   } | null>(null)
   const [applied, setApplied] = useState(false)
 
