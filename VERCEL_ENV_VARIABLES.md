@@ -13,7 +13,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6ZW9zc2dzc2drbmlza2JrdnluIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzU5Nzc4OSwiZXhwIjoyMDgzMTczNzg5fQ.0uWxbdgZZ1x26qMIgkZp54DH94rG6CVMRsaYloUxW7Q
 
 # Database (REQUIRED)
-DATABASE_URL=postgresql://postgres:Platanos2903!@db.ezeossgssgkniskbkvyn.supabase.co:5432/postgres
+# ⚠️ IMPORTANT: Use Connection Pooling (port 6543) for Vercel, NOT direct connection (5432)
+# Get the pooling URL from Supabase Dashboard → Settings → Database → Connection Pooling
+DATABASE_URL=postgresql://postgres.ezeossgssgkniskbkvyn:Platanos2903!@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+# Alternative if above doesn't work:
+# DATABASE_URL=postgresql://postgres.ezeossgssgkniskbkvyn:Platanos2903!@db.ezeossgssgkniskbkvyn.supabase.co:6543/postgres?pgbouncer=true
 
 # Resend Email (REQUIRED for emails)
 RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
