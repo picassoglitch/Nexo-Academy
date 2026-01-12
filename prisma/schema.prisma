@@ -206,7 +206,7 @@ model Order {
   externalId String          @unique // Stripe payment/session ID
   status     OrderStatus
   amount     Int // Amount in cents (USD)
-  currency   String          @default("USD")
+  currency   String          @default("MXN")
   couponId   String?
   createdAt  DateTime        @default(now())
 

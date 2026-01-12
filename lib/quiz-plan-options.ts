@@ -19,8 +19,8 @@ export const QUIZ_PLAN_OPTIONS: QuizPlanOption[] = [
     name: "Starter",
     icon: "🚀",
     tagline: "Ideal para empezar",
-    price: 299,
-    oldPrice: 599,
+    price: 29900, // $299 MXN in centavos
+    oldPrice: 59900, // $599 MXN in centavos
     currency: "MXN",
     features: [
       { text: "Reto de 30 días completo", included: true },
@@ -40,8 +40,8 @@ export const QUIZ_PLAN_OPTIONS: QuizPlanOption[] = [
     name: "Freelancer",
     icon: "💼",
     tagline: "Mejor valor para la mayoría",
-    price: 999,
-    oldPrice: 4999,
+    price: 99900, // $999 MXN in centavos
+    oldPrice: 499900, // $4,999 MXN in centavos
     currency: "MXN",
     features: [
       { text: "Reto de 30 días completo", included: true },

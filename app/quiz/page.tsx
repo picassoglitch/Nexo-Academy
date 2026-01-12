@@ -889,11 +889,11 @@ export default function QuizPage() {
                       <div className="mb-4">
                         {plan.oldPrice && (
                           <div className="text-slate-500 line-through text-lg mb-1">
-                            ${plan.oldPrice} MXN
+                            ${(plan.oldPrice / 100).toLocaleString("es-MX")} MXN
                           </div>
                         )}
                         <div className={`text-4xl md:text-5xl font-bold ${isRecommended ? "text-white" : "text-white"}`}>
-                          ${plan.price} MXN
+                          ${(plan.price / 100).toLocaleString("es-MX")} MXN
                         </div>
                         {plan.msiText && (
                           <div className="text-slate-400 text-sm mt-2">{plan.msiText}</div>

@@ -501,12 +501,12 @@ export default function HomePage() {
                         <div className="mb-2">
                           {plan.oldPrice && (
                             <p className="text-sm text-gray-500 line-through mb-1">
-                              ${plan.oldPrice} USD
+                              ${(plan.oldPrice / 100).toLocaleString("es-MX")} MXN
                             </p>
                           )}
                           <p className={`text-5xl font-bold ${isPopular ? "text-orange-600" : "text-gray-900"}`}>
-                            ${plan.price}
-                            <span className="text-lg text-gray-600"> USD</span>
+                            ${(plan.price / 100).toLocaleString("es-MX")}
+                            <span className="text-lg text-gray-600"> MXN</span>
                           </p>
                           {plan.msiText && (
                             <p className="text-sm text-gray-600 mt-1">{plan.msiText}</p>

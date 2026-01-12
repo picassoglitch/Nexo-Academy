@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
           externalId: sessionId,
           status: "APPROVED",
           amount: session.amount_total || 0,
-          currency: "USD",
+          currency: "MXN",
         },
       })
       console.log(`✅ [Fallback] Created order for session:`, sessionId)
