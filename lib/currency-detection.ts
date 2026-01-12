@@ -31,50 +31,13 @@ const COUNTRY_TO_CURRENCY: Record<string, string> = {
 /**
  * Detects currency from request headers
  * Uses Vercel's x-vercel-ip-country header or Accept-Language
- * IMPORTANT: Mexico always uses MXN, others get their local currency
+ * IMPORTANT: Always returns MXN - this is our base currency
+ * Stripe will handle currency conversion display for non-Mexico users
  */
 export function detectCurrencyFromRequest(request: Request): string {
-  // Try Vercel's country header first (most reliable)
-  const countryHeader = request.headers.get("x-vercel-ip-country") || 
-                        request.headers.get("cf-ipcountry") || // Cloudflare
-                        request.headers.get("x-country-code")
-  
-  if (countryHeader) {
-    const country = countryHeader.toUpperCase()
-    
-    // Mexico always uses MXN
-    if (country === "MX") {
-      return "mxn"
-    }
-    
-    // For other countries, use their local currency
-    const currency = COUNTRY_TO_CURRENCY[country]
-    if (currency) {
-      return currency
-    }
-  }
-
-  // Try Accept-Language header as fallback
-  const acceptLanguage = request.headers.get("accept-language")
-  if (acceptLanguage) {
-    // Extract country from locale (e.g., "es-MX" -> "MX")
-    const localeMatch = acceptLanguage.match(/([a-z]{2})-([A-Z]{2})/i)
-    if (localeMatch) {
-      const country = localeMatch[2]
-      
-      // Mexico always uses MXN
-      if (country === "MX") {
-        return "mxn"
-      }
-      
-      const currency = COUNTRY_TO_CURRENCY[country]
-      if (currency) {
-        return currency
-      }
-    }
-  }
-
-  // Default to MXN (base currency for the site)
+  // Always return MXN - this is our base currency
+  // Stripe checkout will display in MXN for all users
+  // For non-Mexico users, Stripe may show conversion, but charge is in MXN
   return "mxn"
 }
 

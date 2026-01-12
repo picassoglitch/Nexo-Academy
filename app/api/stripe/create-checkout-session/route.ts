@@ -122,26 +122,21 @@ export async function POST(request: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
     // IMPORTANT: All prices are in MXN (base currency)
-    // For Mexico users: use MXN directly
-    // For non-Mexico users: convert MXN to their local currency for Stripe
-    const { detectCurrencyFromRequest, isUserFromMexico, convertMXNToCurrency } = await import("@/lib/currency-detection")
+    // For Mexico users: ALWAYS use MXN
+    // For non-Mexico users: use MXN but Stripe will show conversion
+    const { isUserFromMexico } = await import("@/lib/currency-detection")
     
     const userIsFromMexico = isUserFromMexico(request)
-    const userCurrency = detectCurrencyFromRequest(request)
     
-    console.log("User from Mexico:", userIsFromMexico, "Currency:", userCurrency)
+    console.log("User from Mexico:", userIsFromMexico)
     
-    // Always use MXN as base - prices are stored in MXN centavos
-    // For non-Mexico users, convert to their currency for Stripe checkout
-    let finalCurrency = "mxn"
-    let finalAmount = amount // Amount is already in MXN centavos
+    // ALWAYS use MXN for Stripe checkout - this is our base currency
+    // Stripe will handle currency conversion display for non-Mexico users
+    // But the actual charge will be in MXN
+    const finalCurrency = "mxn"
+    const finalAmount = amount // Amount is already in MXN centavos
     
-    if (!userIsFromMexico && userCurrency !== "mxn") {
-      // Convert MXN to user's currency
-      finalCurrency = userCurrency
-      finalAmount = convertMXNToCurrency(amount, userCurrency)
-      console.log(`Converted ${amount} MXN centavos to ${finalAmount} ${userCurrency} centavos`)
-    }
+    console.log(`Using MXN currency for Stripe checkout: ${finalAmount} centavos (${finalAmount / 100} MXN)`)
 
     // Handle coupon if provided
     let couponId: string | undefined
@@ -177,8 +172,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       customer_email: email,
-      locale: "es", // Set locale to Spanish to avoid i18n errors
-      // Let Stripe detect customer's preferred currency/locale
+      locale: userIsFromMexico ? "es-MX" : "es", // Use es-MX for Mexico to show MXN
+      // Force MXN currency for all users (base currency)
       payment_method_options: {
         card: {
           request_three_d_secure: "automatic",
