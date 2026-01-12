@@ -1,5 +1,5 @@
 import "dotenv/config"
-import { PrismaClient } from "../.prisma/client/client"
+import { PrismaClient } from "@prisma/client"
 
 // PrismaClient reads DATABASE_URL from environment variables automatically
 const prisma = new PrismaClient({} as any)
