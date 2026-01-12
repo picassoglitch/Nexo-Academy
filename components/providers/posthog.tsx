@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 import posthog from "posthog-js"
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
