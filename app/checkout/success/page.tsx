@@ -87,7 +87,7 @@ function CheckoutSuccessContent() {
               // Fetch activation code if needed
               if (data.needsAccountCreation) {
                 try {
-                  const activationCodeResponse = await fetch(`/api/activation/get-by-session?sessionId=${sessionId}`)
+                  const activationCodeResponse = await fetch(`/api/activation/get-by-session?session_id=${sessionId}`)
                   const activationCodeData = await activationCodeResponse.json()
                   if (activationCodeResponse.ok && activationCodeData.code) {
                     data.activationCode = activationCodeData.code
@@ -116,7 +116,7 @@ function CheckoutSuccessContent() {
               // Fetch activation code if needed
               if (data.needsAccountCreation) {
                 try {
-                  const activationCodeResponse = await fetch(`/api/activation/get-by-session?sessionId=${sessionId}`)
+                  const activationCodeResponse = await fetch(`/api/activation/get-by-session?session_id=${sessionId}`)
                   const activationCodeData = await activationCodeResponse.json()
                   if (activationCodeResponse.ok && activationCodeData.code) {
                     data.activationCode = activationCodeData.code
