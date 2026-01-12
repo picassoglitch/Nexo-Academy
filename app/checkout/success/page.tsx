@@ -95,13 +95,18 @@ function CheckoutSuccessContent() {
                   } else {
                     // Order might not exist yet - this is OK, we'll retry
                     if (activationCodeResponse.status === 404) {
-                      console.log("Order not found yet, will retry on next poll")
+                      console.log("Order or activation code not found yet, will retry on next poll")
+                    } else if (activationCodeResponse.status === 500) {
+                      // Server error - might be table doesn't exist or other issue
+                      console.warn("Server error retrieving activation code:", activationCodeData.error, activationCodeData.details)
+                      // Don't fail completely, just log the warning
                     } else {
                       console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
                     }
                   }
                 } catch (activationError) {
                   console.error("Error fetching activation code:", activationError)
+                  // Don't fail completely, just log the error
                 }
               }
               
@@ -129,13 +134,18 @@ function CheckoutSuccessContent() {
                   } else {
                     // Order might not exist yet - this is OK
                     if (activationCodeResponse.status === 404) {
-                      console.log("Order not found yet (webhook may not have processed)")
+                      console.log("Order or activation code not found yet (webhook may not have processed)")
+                    } else if (activationCodeResponse.status === 500) {
+                      // Server error - might be table doesn't exist or other issue
+                      console.warn("Server error retrieving activation code:", activationCodeData.error, activationCodeData.details)
+                      // Don't fail completely, just log the warning
                     } else {
                       console.warn("Could not retrieve activation code for session:", sessionId, activationCodeData.error)
                     }
                   }
                 } catch (activationError) {
                   console.error("Error fetching activation code:", activationError)
+                  // Don't fail completely, just log the error
                 }
               }
               
