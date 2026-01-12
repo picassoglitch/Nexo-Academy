@@ -40,11 +40,14 @@ export default function PlanCard({
   className,
 }: PlanCardProps) {
   const formatPrice = (amount: number) => {
+    // Amount is in centavos, convert to pesos
+    const pesos = amount / 100
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
       minimumFractionDigits: 0,
-    }).format(amount)
+      maximumFractionDigits: 0,
+    }).format(pesos)
   }
 
   return (

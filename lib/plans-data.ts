@@ -3,8 +3,8 @@ import { PlanCardProps } from "@/components/plan-card"
 export const PLANS_DATA: Omit<PlanCardProps, "className">[] = [
   {
     name: "Starter",
-    price: 299,
-    oldPrice: 599,
+    price: 29900, // $299 MXN in centavos
+    oldPrice: 59900, // $599 MXN in centavos
     tagline: "Ideal para empezar",
     features: [
       { text: "Reto de 30 días completo", included: true },
@@ -23,8 +23,8 @@ export const PLANS_DATA: Omit<PlanCardProps, "className">[] = [
   },
   {
     name: "PRO",
-    price: 999,
-    oldPrice: 4999,
+    price: 99900, // $999 MXN in centavos
+    oldPrice: 499900, // $4,999 MXN in centavos
     tagline: "Mejor valor para la mayoría",
     features: [
       { text: "Reto de 30 días completo", included: true },
@@ -42,8 +42,8 @@ export const PLANS_DATA: Omit<PlanCardProps, "className">[] = [
   },
   {
     name: "Operator",
-    price: 3999,
-    oldPrice: 7999,
+    price: 399900, // $3,999 MXN in centavos
+    oldPrice: 799900, // $7,999 MXN in centavos
     tagline: "Para quienes ya están operando",
     features: [
       { text: "Todo lo del Pro", included: true },

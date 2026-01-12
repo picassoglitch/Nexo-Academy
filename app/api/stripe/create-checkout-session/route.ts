@@ -121,9 +121,27 @@ export async function POST(request: NextRequest) {
     // Get site URL
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
-    // Detect user's currency from request headers
-    const currency = detectCurrencyFromRequest(request)
-    console.log("Detected currency:", currency)
+    // IMPORTANT: All prices are in MXN (base currency)
+    // For Mexico users: use MXN directly
+    // For non-Mexico users: convert MXN to their local currency for Stripe
+    const { detectCurrencyFromRequest, isUserFromMexico, convertMXNToCurrency } = await import("@/lib/currency-detection")
+    
+    const userIsFromMexico = isUserFromMexico(request)
+    const userCurrency = detectCurrencyFromRequest(request)
+    
+    console.log("User from Mexico:", userIsFromMexico, "Currency:", userCurrency)
+    
+    // Always use MXN as base - prices are stored in MXN centavos
+    // For non-Mexico users, convert to their currency for Stripe checkout
+    let finalCurrency = "mxn"
+    let finalAmount = amount // Amount is already in MXN centavos
+    
+    if (!userIsFromMexico && userCurrency !== "mxn") {
+      // Convert MXN to user's currency
+      finalCurrency = userCurrency
+      finalAmount = convertMXNToCurrency(amount, userCurrency)
+      console.log(`Converted ${amount} MXN centavos to ${finalAmount} ${userCurrency} centavos`)
+    }
 
     // Handle coupon if provided
     let couponId: string | undefined
@@ -145,12 +163,12 @@ export async function POST(request: NextRequest) {
       line_items: [
         {
           price_data: {
-            currency: currency, // Use detected currency
+            currency: finalCurrency, // MXN for Mexico, converted currency for others
             product_data: {
               name: `Nexo - ${tierInfo.name}`,
               description: tierInfo.description,
             },
-            unit_amount: amount, // Amount in cents (or smallest currency unit)
+            unit_amount: finalAmount, // MXN centavos for Mexico, converted amount for others
             recurring: {
               interval: "month", // Monthly subscription
             },

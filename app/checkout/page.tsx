@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TIERS } from "@/lib/constants"
 import { formatCurrency } from "@/lib/utils"
+import { formatCurrency as formatCurrencyMXN } from "@/lib/currency-detection"
 import { createClient } from "@/lib/supabase/client"
 import { StripeCheckout } from "@/components/stripe-checkout"
 import { PLANS_DATA } from "@/lib/plans-data"
@@ -175,7 +176,7 @@ function CheckoutContent() {
                     <div className="flex items-baseline justify-between mb-2">
                       <span className="text-sm text-gray-600">Precio</span>
                       <span className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(tierInfo.price)}
+                        {formatCurrency(tierInfo.price, "MXN")}
                       </span>
                     </div>
                     {couponApplied && (
@@ -185,7 +186,8 @@ function CheckoutContent() {
                           -{formatCurrency(
                             couponApplied.type === "PERCENT"
                               ? (tierInfo.price * couponApplied.amount) / 100
-                              : couponApplied.amount
+                              : couponApplied.amount,
+                            "MXN"
                           )}
                         </span>
                       </div>
@@ -226,7 +228,7 @@ function CheckoutContent() {
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-semibold text-gray-900">Total</span>
                       <span className="text-3xl font-bold text-blue-600">
-                        {formatCurrency(total)}
+                        {formatCurrency(total, "MXN")}
                       </span>
                     </div>
                     {planData.msiText && (
@@ -248,7 +250,7 @@ function CheckoutContent() {
                               Accede a plantillas profesionales, scripts y recursos avanzados
                             </p>
                             <p className="text-sm font-bold text-orange-600 mb-3">
-                              Solo +{formatCurrency(upgradePrice)}
+                              Solo +{formatCurrency(upgradePrice, "MXN")}
                             </p>
                             <Button
                               asChild

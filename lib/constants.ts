@@ -1,18 +1,23 @@
 export const TIERS = {
   STARTER: {
     name: "Starter",
-    price: 1799, // $17.99 USD in cents
+    price: 29900, // $299 MXN in centavos
+    oldPrice: 59900, // $599 MXN (crossed out)
     description: "30 días de reto, 1 camino de ingresos, plantillas core",
   },
   PRO: {
     name: "Pro",
-    price: 5999, // $59.99 USD in cents
+    price: 99900, // $999 MXN in centavos
+    oldPrice: 499900, // $4,999 MXN (crossed out)
     description: "Todos los caminos, scripts de WhatsApp, outreach, comunidad",
+    msiText: "Desde $166 MXN/mes (6 MSI)",
   },
   OPERATOR: {
     name: "Operator",
-    price: 23499, // $234.99 USD in cents
+    price: 399900, // $3,999 MXN in centavos
+    oldPrice: 799900, // $7,999 MXN (crossed out)
     description: "Workflows done-for-you, auditorías, casos reales, sesiones en vivo",
+    msiText: "Desde $333 MXN/mes (12 MSI)",
   },
 } as const
 
