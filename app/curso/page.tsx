@@ -85,7 +85,7 @@ export default async function CursoPage() {
         return true // If parsing fails, allow access
       }
     } else if (Array.isArray(course.requiredTiers)) {
-      courseTiers = course.requiredTiers
+      courseTiers = course.requiredTiers as string[]
     }
     
     // If "ALL" is in the list, everyone can access
@@ -113,7 +113,7 @@ export default async function CursoPage() {
           return false
         }
       } else if (Array.isArray(course.requiredTiers)) {
-        courseTiers = course.requiredTiers
+        courseTiers = course.requiredTiers as string[]
       }
       
       // Show courses that require PRO or OPERATOR (not ALL or STARTER)

@@ -15,7 +15,7 @@ interface Course {
   title: string
   description: string | null
   published: boolean
-  requiredTier?: string
+  requiredTiers?: any // Json type from Prisma
 }
 
 interface CourseEditProps {

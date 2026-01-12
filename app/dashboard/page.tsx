@@ -99,7 +99,7 @@ export default async function DashboardPage() {
           return true
         }
       } else if (Array.isArray(course.requiredTiers)) {
-        courseTiers = course.requiredTiers
+        courseTiers = course.requiredTiers as string[]
       }
       
       // Show courses that require PRO/OPERATOR OR other Starter-accessible courses
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
           return true
         }
       } else if (Array.isArray(course.requiredTiers)) {
-        courseTiers = course.requiredTiers
+        courseTiers = course.requiredTiers as string[]
       }
       
       if (courseTiers.includes("ALL")) return true

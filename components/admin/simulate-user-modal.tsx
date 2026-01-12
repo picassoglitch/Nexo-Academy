@@ -227,13 +227,13 @@ export default function SimulateUserModal({ isOpen, onClose, onPathSelected, onS
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-gray-600 mb-2">Camino Recomendado:</p>
-                  <Badge className="text-lg px-4 py-2">{result.tier}</Badge>
+                  <Badge className="text-lg px-4 py-2">{result?.tier || "N/A"}</Badge>
                 </div>
 
                 <div>
                   <p className="text-sm text-gray-600 mb-2">Razonamiento:</p>
                   <p className="text-sm text-gray-700 bg-white p-3 rounded-lg">
-                    {result.reasoning}
+                    {result?.reasoning || "N/A"}
                   </p>
                 </div>
 

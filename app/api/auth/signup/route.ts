@@ -67,9 +67,6 @@ export async function POST(request: NextRequest) {
       type: "signup",
       email: email,
       password: password,
-      options: {
-        email_redirect_to: `${siteUrl}/auth/confirm-email`,
-      },
     })
 
     if (linkError || !linkData?.properties?.action_link) {

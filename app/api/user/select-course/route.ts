@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
           // If parsing fails, allow access
         }
       } else if (Array.isArray(course.requiredTiers)) {
-        courseTiers = course.requiredTiers
+        courseTiers = course.requiredTiers as string[]
       }
 
       if (courseTiers.length > 0 && !courseTiers.includes("ALL") && !courseTiers.includes("STARTER")) {

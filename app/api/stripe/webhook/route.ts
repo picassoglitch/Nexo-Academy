@@ -253,11 +253,8 @@ export async function POST(request: NextRequest) {
                 // Use email_redirect_to to redirect after confirmation (like regular signup)
                 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
                 const { data: linkData, error: linkError } = await supabaseForLink.auth.admin.generateLink({
-                  type: "signup",
+                  type: "invite",
                   email: dbUser.email,
-                  options: {
-                    email_redirect_to: `${siteUrl}/dashboard?email_confirmed=true`,
-                  },
                 })
                 
                 if (!linkError && linkData?.properties?.action_link) {

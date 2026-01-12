@@ -57,9 +57,6 @@ export async function POST(request: NextRequest) {
       const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: "invite",
         email: email,
-        options: {
-          email_redirect_to: `${siteUrl}/auth/confirm-email`,
-        },
       })
 
       if (linkError || !linkData?.properties?.action_link) {

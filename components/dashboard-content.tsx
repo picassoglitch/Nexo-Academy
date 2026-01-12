@@ -133,7 +133,7 @@ export default function DashboardContent({
           return true
         }
       } else if (Array.isArray(course.requiredTiers)) {
-        courseTiers = course.requiredTiers
+        courseTiers = course.requiredTiers as string[]
       }
       return courseTiers.includes("ALL") || courseTiers.includes("STARTER")
     }
