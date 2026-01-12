@@ -47,11 +47,11 @@ After first deploy:
 ### 4. Configure Webhooks
 
 **Stripe Webhook**:
-- Endpoint: `https://your-app.vercel.app/api/stripe/webhook`
+- Endpoint: `https://nexo-ai.world/api/stripe/webhook`
 - Events: `checkout.session.completed`, `customer.subscription.*`, `invoice.*`
 
 **Resend Webhook** (optional):
-- Endpoint: `https://your-app.vercel.app/api/resend/webhook`
+- Endpoint: `https://nexo-ai.world/api/resend/webhook`
 - Events: All email events
 
 ---

@@ -22,21 +22,19 @@ Si no, ve a Vercel Dashboard → Add New Project → Import `picassoglitch/Nexo-
 
 ### 3️⃣ Actualizar Site URL
 
-Después del primer deploy:
-1. Copia tu dominio de Vercel (ej: `https://nexo-academy.vercel.app`)
-2. Ve a Vercel → Settings → Environment Variables
-3. Actualiza `NEXT_PUBLIC_SITE_URL` con tu dominio real
-4. Vercel redeployará automáticamente
+**Tu dominio de producción**: `https://nexo-ai.world`
+
+Asegúrate de que `NEXT_PUBLIC_SITE_URL` esté configurado como `https://nexo-ai.world` en Vercel.
 
 ### 4️⃣ Configurar Webhooks (Opcional pero Recomendado)
 
 **Stripe Webhook**:
-- Endpoint: `https://tu-dominio.vercel.app/api/stripe/webhook`
+- Endpoint: `https://nexo-ai.world/api/stripe/webhook`
 - Eventos: `checkout.session.completed`, `customer.subscription.*`, `invoice.*`
 - Ver: `STRIPE_SETUP.md`
 
 **Resend Webhook** (opcional):
-- Endpoint: `https://tu-dominio.vercel.app/api/resend/webhook`
+- Endpoint: `https://nexo-ai.world/api/resend/webhook`
 - Ver: `RESEND_WEBHOOK_SETUP.md`
 
 ---

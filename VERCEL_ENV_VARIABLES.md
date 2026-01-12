@@ -35,8 +35,8 @@ DATABASE_URL=postgresql://postgres.ezeossgssgkniskbkvyn:Platanos2903!@aws-0-us-e
 RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
 RESEND_FROM_EMAIL=Nexo <onboarding@resend.dev>
 
-# Site URL (REQUIRED - Update after first deploy with your actual Vercel domain)
-NEXT_PUBLIC_SITE_URL=https://your-app.vercel.app
+# Site URL (REQUIRED - Your production domain)
+NEXT_PUBLIC_SITE_URL=https://nexo-ai.world
 
 # Admin (REQUIRED)
 ADMIN_BOOTSTRAP_EMAIL=picassoglitch@gmail.com
@@ -70,4 +70,4 @@ RESEND_WEBHOOK_SECRET=whsec_...  # Get from Resend Dashboard → Webhooks
 
 - ⚠️ **Never commit** these values to git (they're already in `.gitignore`)
 - ✅ Set all variables for all environments (Production, Preview, Development)
-- 🔄 After first deploy, update `NEXT_PUBLIC_SITE_URL` with your actual domain
+- 🌐 Your production domain: `https://nexo-ai.world`

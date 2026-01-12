@@ -26,7 +26,7 @@ RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
 RESEND_FROM_EMAIL=Nexo <onboarding@resend.dev>
 
 # Site URL (Update after first deploy)
-NEXT_PUBLIC_SITE_URL=https://your-app.vercel.app
+NEXT_PUBLIC_SITE_URL=https://nexo-ai.world
 
 # Admin (REQUIRED)
 ADMIN_BOOTSTRAP_EMAIL=picassoglitch@gmail.com
@@ -54,7 +54,7 @@ RESEND_WEBHOOK_SECRET=whsec_...
 
 ### 5. Stripe Configuration (if using)
 - [ ] Live API keys obtained
-- [ ] Webhook endpoint configured: `https://your-app.vercel.app/api/stripe/webhook`
+- [ ] Webhook endpoint configured: `https://nexo-ai.world/api/stripe/webhook`
 - [ ] Webhook events subscribed:
   - `checkout.session.completed`
   - `customer.subscription.created`
@@ -66,7 +66,7 @@ RESEND_WEBHOOK_SECRET=whsec_...
 ### 6. Resend Configuration
 - [ ] API key valid
 - [ ] Domain verified (if using custom domain)
-- [ ] Webhook configured (optional): `https://your-app.vercel.app/api/resend/webhook`
+- [ ] Webhook configured (optional): `https://nexo-ai.world/api/resend/webhook`
 
 ---
 
@@ -96,9 +96,9 @@ RESEND_FROM_EMAIL=Nexo <onboarding@resend.dev>
 ADMIN_BOOTSTRAP_EMAIL=picassoglitch@gmail.com
 ```
 
-#### Site URL (Update after first deploy)
+#### Site URL (Your production domain)
 ```env
-NEXT_PUBLIC_SITE_URL=https://your-actual-domain.vercel.app
+NEXT_PUBLIC_SITE_URL=https://nexo-ai.world
 ```
 
 #### Stripe (if using)
@@ -125,13 +125,11 @@ RESEND_WEBHOOK_SECRET=whsec_...
    vercel --prod
    ```
 
-### Step 4: Update Site URL
+### Step 4: Verify Site URL
 
-After first deployment:
-1. Copy your Vercel domain (e.g., `https://nexo-academy.vercel.app`)
-2. Go to Vercel → Settings → Environment Variables
-3. Update `NEXT_PUBLIC_SITE_URL` with your actual domain
-4. Redeploy (or wait for auto-redeploy)
+Your production domain is: `https://nexo-ai.world`
+
+Make sure `NEXT_PUBLIC_SITE_URL` is set to `https://nexo-ai.world` in Vercel Environment Variables.
 
 ---
 
