@@ -103,28 +103,47 @@ export function isUserFromMexico(request: Request): boolean {
 }
 
 /**
- * Convert MXN amount to another currency (approximate rates)
+ * Convert MXN amount (in centavos) to another currency (in cents/centavos)
  * For production, you should use a real-time exchange rate API
+ * 
+ * @param amountMXN - Amount in MXN centavos
+ * @param targetCurrency - Target currency code
+ * @returns Amount in target currency's smallest unit (cents/centavos)
  */
 export function convertMXNToCurrency(amountMXN: number, targetCurrency: string): number {
-  // Approximate exchange rates (update these or use an API)
+  // Convert centavos to pesos first
+  const pesosMXN = amountMXN / 100
+  
+  // Approximate exchange rates (update these regularly or use an API)
+  // Rates are: 1 MXN = X targetCurrency
   const exchangeRates: Record<string, number> = {
     usd: 0.06, // 1 MXN ≈ 0.06 USD (approximate, update regularly)
-    eur: 0.055,
-    gbp: 0.047,
-    cad: 0.08,
-    ars: 50,
-    clp: 55,
-    cop: 240,
-    pen: 0.22,
-    brl: 0.30,
-    jpy: 9,
-    cny: 0.43,
-    inr: 5,
+    eur: 0.055, // 1 MXN ≈ 0.055 EUR
+    gbp: 0.047, // 1 MXN ≈ 0.047 GBP
+    cad: 0.08, // 1 MXN ≈ 0.08 CAD
+    ars: 50, // 1 MXN ≈ 50 ARS
+    clp: 55, // 1 MXN ≈ 55 CLP
+    cop: 240, // 1 MXN ≈ 240 COP
+    pen: 0.22, // 1 MXN ≈ 0.22 PEN
+    brl: 0.30, // 1 MXN ≈ 0.30 BRL
+    jpy: 9, // 1 MXN ≈ 9 JPY
+    cny: 0.43, // 1 MXN ≈ 0.43 CNY
+    inr: 5, // 1 MXN ≈ 5 INR
   }
 
   const rate = exchangeRates[targetCurrency.toLowerCase()] || 0.06 // Default to USD rate
-  return Math.round(amountMXN * rate)
+  
+  // Convert pesos to target currency
+  const targetAmount = pesosMXN * rate
+  
+  // Convert back to cents/centavos (smallest unit)
+  // For JPY, no decimals, so round to nearest integer
+  if (targetCurrency.toLowerCase() === "jpy") {
+    return Math.round(targetAmount)
+  }
+  
+  // For other currencies, multiply by 100 to get cents
+  return Math.round(targetAmount * 100)
 }
 
 /**
