@@ -15,9 +15,21 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 # Database (REQUIRED)
 # ⚠️ IMPORTANT: Use Connection Pooling (port 6543) for Vercel, NOT direct connection (5432)
 # Get the pooling URL from Supabase Dashboard → Settings → Database → Connection Pooling
+# Format: postgresql://postgres.[PROJECT-REF]:[PASSWORD]@[POOLER-HOST]:6543/postgres?pgbouncer=true
+# 
+# Step 1: Go to Supabase Dashboard → Settings → Database → Connection Pooling
+# Step 2: Copy the connection string (should show port 6543)
+# Step 3: Replace [YOUR-PASSWORD] with your actual database password
+# Step 4: Add ?pgbouncer=true at the end
+#
+# Example (update with your actual pooler host):
 DATABASE_URL=postgresql://postgres.ezeossgssgkniskbkvyn:Platanos2903!@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-# Alternative if above doesn't work:
+# 
+# Alternative format (if pooler host is different):
 # DATABASE_URL=postgresql://postgres.ezeossgssgkniskbkvyn:Platanos2903!@db.ezeossgssgkniskbkvyn.supabase.co:6543/postgres?pgbouncer=true
+#
+# To get your database password:
+# Supabase Dashboard → Settings → Database → Reset database password
 
 # Resend Email (REQUIRED for emails)
 RESEND_API_KEY=re_XYPpQZEC_DhjBW6zN8FBkTkBk1iPRQZeB
