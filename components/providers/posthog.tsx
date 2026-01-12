@@ -37,3 +37,10 @@ function PostHogContent({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<>{children}</>}>
+      <PostHogContent>{children}</PostHogContent>
+    </Suspense>
+  )
+}
