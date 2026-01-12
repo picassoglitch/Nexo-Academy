@@ -448,3 +448,48 @@ model StripeEvent {
   @@index([processed])
   @@index([createdAt])
 }
+
+// Lead Magnet PDFs - for email subscriptions
+model LeadMagnet {
+  id          String   @id @default(uuid())
+  name        String   // Display name
+  fileName    String   // Original file name
+  fileUrl     String   // URL to the PDF file
+  fileSize    Int?     // File size in bytes
+  variant     String   // "A" or "B" for alternating delivery
+  active      Boolean  @default(true)
+  sendCount   Int      @default(0) // How many times sent
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscribers EmailSubscriber[]
+
+  @@index([variant])
+  @@index([active])
+}
+
+// Email Subscribers - track subscriptions and PDF delivery
+model EmailSubscriber {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  source        String?   // Where they subscribed from
+  leadMagnetId  String?   // Which PDF they received
+  pdfSentAt     DateTime? // When the PDF was sent
+  pdfVariant    String?   // "A" or "B"
+  emailVerified Boolean   @default(false)
+  unsubscribed  Boolean   @default(false)
+  unsubscribedAt DateTime?
+  ipAddress     String?
+  userAgent     String?
+  country       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  leadMagnet LeadMagnet? @relation(fields: [leadMagnetId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([source])
+  @@index([pdfVariant])
+  @@index([createdAt])
+}
