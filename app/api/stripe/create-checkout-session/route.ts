@@ -122,8 +122,7 @@ export async function POST(request: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
     // IMPORTANT: All prices are in MXN (base currency)
-    // For Mexico users: ALWAYS use MXN
-    // For non-Mexico users: use MXN but Stripe will show conversion
+    // ALWAYS use MXN for Stripe checkout - this is our base currency
     const { isUserFromMexico } = await import("@/lib/currency-detection")
     
     const userIsFromMexico = isUserFromMexico(request)
@@ -131,8 +130,7 @@ export async function POST(request: NextRequest) {
     console.log("User from Mexico:", userIsFromMexico)
     
     // ALWAYS use MXN for Stripe checkout - this is our base currency
-    // Stripe will handle currency conversion display for non-Mexico users
-    // But the actual charge will be in MXN
+    // Stripe will display in MXN for all users
     const finalCurrency = "mxn"
     const finalAmount = amount // Amount is already in MXN centavos
     
@@ -158,12 +156,12 @@ export async function POST(request: NextRequest) {
       line_items: [
         {
           price_data: {
-            currency: finalCurrency, // MXN for Mexico, converted currency for others
+            currency: "mxn", // ALWAYS use MXN - this is our base currency
             product_data: {
               name: `Nexo - ${tierInfo.name}`,
               description: tierInfo.description,
             },
-            unit_amount: finalAmount, // MXN centavos for Mexico, converted amount for others
+            unit_amount: finalAmount, // Amount in MXN centavos
             recurring: {
               interval: "month", // Monthly subscription
             },
@@ -172,7 +170,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       customer_email: email,
-      locale: userIsFromMexico ? "es-MX" : "es", // Use es-MX for Mexico to show MXN
+      locale: "es-MX", // Use es-MX locale to ensure MXN currency display
       // Force MXN currency for all users (base currency)
       payment_method_options: {
         card: {
