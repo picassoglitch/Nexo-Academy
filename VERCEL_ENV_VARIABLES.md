@@ -46,7 +46,15 @@ ADMIN_BOOTSTRAP_EMAIL=picassoglitch@gmail.com
 
 ```env
 STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=whsec_...  # Get from Stripe Dashboard → Webhooks → Signing secret
+```
+
+## Optional Variables (for Webhooks)
+
+```env
+# Resend Webhook (optional but recommended for email tracking)
+RESEND_WEBHOOK_SECRET=whsec_...  # Get from Resend Dashboard → Webhooks
 ```
 
 ## Instructions
