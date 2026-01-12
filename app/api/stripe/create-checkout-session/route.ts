@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       customer_email: email,
-      locale: "es-MX", // Use es-MX locale to ensure MXN currency display
+      locale: "es", // Use Spanish locale (Stripe doesn't support es-MX, but es works with MXN currency)
       // Force MXN currency for all users (base currency)
       payment_method_options: {
         card: {
