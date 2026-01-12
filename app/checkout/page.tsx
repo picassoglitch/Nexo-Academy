@@ -118,7 +118,8 @@ function CheckoutContent() {
 
   // Calculate upgrade price if not Operator
   const showUpgrade = tier !== "OPERATOR"
-  const upgradePrice = tier === "STARTER" ? 370000 : 300000 // $3,700 or $3,000 in cents
+  // Upgrade prices in MXN centavos: Starter->Pro = $700, Pro->Operator = $3,000
+  const upgradePrice = tier === "STARTER" ? 70000 : 300000 // $700 or $3,000 MXN in centavos
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
